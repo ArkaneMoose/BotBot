@@ -22,8 +22,8 @@ snapshot_dir = 'snapshots'
 
 bots = []
 
-spam_threshold_messages = 5
-spam_threshold_time = 3
+spam_threshold_messages = 10
+spam_threshold_time = 5
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
@@ -50,190 +50,206 @@ class bot_data_parser:
         if parse_string[i] == '\n':
             i += 1
         while i < len(parse_string):
-            if regex_mode:
-                if parse_string[i:i+4] == ' -> ':
-                    i += 4
-                    regex_mode = False
-                    self.array.append([re.compile(temp, re.IGNORECASE + re.UNICODE)])
-                    temp = ''
-                elif parse_string[i:i+3] == ' ->' or parse_string[i:i+3] == '-> ':
-                    i += 3
-                    regex_mode = False
-                    self.array.append([re.compile(temp, re.IGNORECASE + re.UNICODE)])
-                    temp = ''
-                elif parse_string[i:i+2] == '->':
-                    i += 2
-                    regex_mode = False
-                    self.array.append([re.compile(temp, re.IGNORECASE + re.UNICODE)])
-                    temp = ''
-                else:
-                    temp += parse_string[i]
-                    i += 1
-            else:
-                while i < len(parse_string) and parse_string[i] != ';':
-                    temp += parse_string[i]
-                    i += 1
-                self.array[-1].append(self.parse_response_string(temp))
-                temp = ''
-                if parse_string[i:i+3] == '; \n':
-                    i += 3
-                elif parse_string[i:i+2] == '; ':
-                    i += 2
-                elif parse_string[i:i+2] == ';\n':
-                    i += 2
-                else:
-                    i += 1
-                regex_mode = True
+			if regex_mode:
+				arrow_match = re.match('\s*->\s*', parse_string[i:])
+				if arrow_match:
+					i += len(arrow_match.group(0))
+					regex_mode = False
+					self.array.append([re.compile(temp, re.IGNORECASE + re.UNICODE)])
+					temp = ''
+				else:
+					temp += parse_string[i]
+					i += 1
+			else:
+				temp = self.parse_response_string(parse_string[i:])
+				self.array[-1].append(temp[0])
+				i += len(temp[1])
+				temp = ''
+				semicolon_match = re.match(';\s*', parse_string[i:])
+				if semicolon_match:
+					i += len(semicolon_match.group(0))
+				else:
+					i += 1
+				regex_mode = True
 
     def load_array(self, array):
         self.array = array
 
     def get_messages(self, content, sender):
-        messages = []
-        for entry in self.array:
-            search_string = content
-            match = entry[0].search(search_string)
-            if match:
-                messages_to_add = self.parse_entry(entry[1])
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
-                    i += 1
-                messages.extend(messages_to_add)
-                continue
-            search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)')
-            match = entry[0].search(search_string)
-            if match:
-                messages_to_add = self.parse_entry(entry[1])
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
-                    i += 1
-                messages.extend(messages_to_add)
-                continue
-            search_string = content.replace(sender, '(sender)')
-            match = entry[0].search(search_string)
-            if match:
-                messages_to_add = self.parse_entry(entry[1])
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
-                    i += 1
-                messages.extend(messages_to_add)
-                continue
-            search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)').replace(sender, '(sender)')
-            match = entry[0].search(search_string)
-            if match:
-                messages_to_add = self.parse_entry(entry[1])
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
-                    i += 1
-                messages.extend(messages_to_add)
-                continue
-        return messages
+		messages = []
+		for entry in self.array:
+			search_string = content
+			match = entry[0].search(search_string)
+			if match:
+				messages_to_add = self.parse_entry(entry[1])
+				groups = match.groups('')
+				i = 0
+				while i < len(messages_to_add):
+					j = len(groups) - 1
+					while j >= 0:
+						messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
+						j -= 1
+					i += 1
+				messages.extend(messages_to_add)
+				continue
+			search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)')
+			match = entry[0].search(search_string)
+			if match:
+				messages_to_add = self.parse_entry(entry[1])
+				groups = match.groups('')
+				i = 0
+				while i < len(messages_to_add):
+					j = len(groups) - 1
+					while j >= 0:
+						messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
+						j -= 1
+					i += 1
+				messages.extend(messages_to_add)
+				continue
+			search_string = content.replace(sender, '(sender)')
+			match = entry[0].search(search_string)
+			if match:
+				messages_to_add = self.parse_entry(entry[1])
+				groups = match.groups('')
+				i = 0
+				while i < len(messages_to_add):
+					j = len(groups) - 1
+					while j >= 0:
+						messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
+						j -= 1
+					i += 1
+				messages.extend(messages_to_add)
+				continue
+			search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)').replace(sender, '(sender)')
+			match = entry[0].search(search_string)
+			if match:
+				messages_to_add = self.parse_entry(entry[1])
+				groups = match.groups('')
+				i = 0
+				while i < len(messages_to_add):
+					j = len(groups) - 1
+					while j >= 0:
+						messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
+						j -= 1
+					i += 1
+				messages.extend(messages_to_add)
+				continue
+		return messages
 
     def get_regexes(self):
-        regexes = []
-        for entry in self.array:
-            regexes.append(entry[0].pattern)
-        return regexes
+		regexes = []
+		for entry in self.array:
+			regexes.append(entry[0].pattern)
+		return regexes
 
-    def parse_entry(self, entry):
-        if entry[0] == 0:
-            return [entry[1]]
-        if entry[0] == 1:
-            return self.parse_entry(entry[random.randint(1, len(entry) - 1)])
-        if entry[0] == 2:
-            retval = []
-            i = 1
-            while i < len(entry):
-                retval.extend(self.parse_entry(entry[i]))
-                i += 1
-            return retval
-        return []
-
-    def parse_response_string(self, string):
-        if len(string) < 2:
-            return [0, string]
-        if string == '<>':
-            return [3]
-        if string[0] == '<' and string[-1] == '>':
-            try:
-                int(string[1:-1])
-                return [3]
-            except ValueError:
-                return [0, string]
-        if (string[0] == '[' and string[-1] == ']') or (string[0] == '{' and string[-1] == '}'):
-            temp2 = []
-            temp = string[1:-1].split(',')
-            if string[0] == '[':
-                temp2.append(1)
-            else:
-                temp2.append(2)
-            i = 0
-            while i < len(temp):
-                if len(temp[i]) > 0 and temp[i][0] == ' ':
-                    temp[i] = temp[i][1:]
-                if len(temp[i]) > 0 and temp[i][0] == '\n':
-                    temp[i] = temp[i][1:]
-                if temp[i][0] == '[' or temp[i][0] == '{':
-                    j = i
-                    brackets = 0
-                    braces = 0
-                    start_loop = True
-                    while start_loop or ((brackets > 0 or braces > 0) and j < len(temp)):
-                        start_loop = False
-                        if len(temp[j]) == 0:
-                            j += 1
-                            continue
-                        if temp[j][0] == '[':
-                            brackets += 1
-                        if temp[j][-1] == ']':
-                            brackets -= 1
-                        if temp[j][0] == '{':
-                            braces += 1
-                        if temp[j][-1] == '}':
-                            braces -= 1
-                        j += 1
-                    temp2.append(self.parse_response_string(','.join(temp[i:j])))
-                    i = j
-                elif temp[i][0] == '<' and temp[i][-1] == '>':
-                    if len(temp[i]) == 2:
-                        temp2.append([3])
+    def parse_entry(self, parsed_data):
+        result_strings = []
+        i = 0
+        if parsed_data[0] == 0:
+            result_strings = ['']
+            for element in parsed_data[1:]:
+                if type(element) is str:
+                    i = 0
+                    while i < len(result_strings):
+                        result_strings[i] += element
                         i += 1
-                        continue
-                    else:
-                        try:
-                            for x in range(0, int(temp[i][1:-1])):
-                                temp2.append([3])
-                                i += 1
-                            continue
-                        except ValueError:
-                            temp2.append([0, temp[i]])
-                            i += 1
-                            continue
                 else:
-                    temp2.append(self.parse_response_string(temp[i]))
-                    i += 1
-            return temp2
-        return [0, string]
+                    subresults = self.parse_entry(element)
+                    if len(subresults) == 0:
+                        subresults.append('')
+                    old_result_strings = result_strings
+                    result_strings = []
+                    for result_string in old_result_strings:
+                        for subresult in subresults:
+                            result_strings.append(result_string + subresult)
+        elif parsed_data[0] == 1:
+            element = parsed_data[random.randint(1, len(parsed_data) - 1)]
+            if type(element) is not str:
+                result_strings = self.parse_entry(element)
+            else:
+                result_strings = [element]
+        elif parsed_data[0] == 2:
+            for element in parsed_data[1:]:
+                if type(element) is str:
+                    result_strings.append(element)
+                else:
+                    result_strings += self.parse_entry(element)
+        else:
+            return []
+        try:
+            while True:
+                result_strings.remove('')
+        except ValueError:
+            return result_strings
+
+    def parse_response_string(self, data, datatype=0):
+        parsed = [datatype]
+        startchars = {'[': 1, '{': 2}
+        endchars = {0: ';', 1: ']', 2: '}'}
+        endchar = endchars[datatype]
+        i = 0
+        separate = True
+        while i < len(data):
+            if separate and re.match(r'\s', data[i]):
+                i += 1
+                continue
+            elif data[i] == endchar:
+                if separate:
+                    parsed.append('')
+                return (parsed, data[:i + 1])
+            elif data[i] in startchars.keys():
+                subparsed = self.parse_response_string(data[i + 1:], startchars[data[i]])
+                i += len(subparsed[1]) + 1
+                if separate or parsed[0] == 0:
+                    parsed.append(subparsed[0])
+                    separate = False
+                else:
+                    if type(parsed[-1]) is list and parsed[-1][0] == 0:
+                        parsed[-1].append(subparsed[0])
+                    else:
+                        parsed[-1] = [0, parsed[-1], subparsed[0]]
+                continue
+            elif data[i] == ',' and parsed[0] != 0:
+                if separate:
+                    parsed.append('')
+                separate = True
+                i += 1
+                continue
+            elif data[i] == '\\':
+                i += 1
+                if type(parsed[-1]) is str and not separate:
+                    parsed[-1] += data[i]
+                elif parsed[0] != 0 and not separate:
+                    if type(parsed[-1]) is list and parsed[-1][0] == 0:
+                        if type(parsed[-1][-1]) is str:
+                            parsed[-1][-1] += data[i]
+                        else:
+                            parsed[-1].append(data[i])
+                    else:
+                        parsed[-1] = [0, parsed[-1], data[i]]
+                else:
+                    parsed.append(data[i])
+                    separate = False
+                i += 1
+                continue
+            else:
+                if type(parsed[-1]) is str and not separate:
+                    parsed[-1] += data[i]
+                elif parsed[0] != 0 and not separate:
+                    if type(parsed[-1]) is list and parsed[-1][0] == 0:
+                        if type(parsed[-1][-1]) is str:
+                            parsed[-1][-1] += data[i]
+                        else:
+                            parsed[-1].append(data[i])
+                    else:
+                        parsed[-1] = [0, parsed[-1], data[i]]
+                else:
+                    parsed.append(data[i])
+                    separate = False
+                i += 1
+        if separate:
+            parsed.append('')
+        return (parsed, data)
 
 class bot_thread (threading.Thread):
     def __init__(self, thread_nickname, data, thread_room_name, creator):
