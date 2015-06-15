@@ -10,7 +10,7 @@ Same as the previous but specify the room to put the bot in.
 
     !createbot &room @BotName CODE
 ***
-List all the bots that are currently running and have been created by this bot.
+List all the bots that are currently running and have been created by @BotBot.
 
     !list @BotBot
 ***
@@ -64,13 +64,13 @@ Just use (sender) in the response to include the sender's name with spaces, and 
 - Bots may not !restore, !pause, or !kill other bots.
 - Bots that are triggered more than 10 times in 5 seconds are automatically paused.
 
-##Regexes
+## Regexes
 For those of you who don't know, "regex" stands for "regular expression", and is a way of doing pattern matching.  
 You can find a good tutorial and reference [here](http://regular-expressions.info/).
 
 ## Good luck!
 Good luck on your journey to becoming a bot programmer. 
 
-If you need help, you can ask @myhandsaretypingwords, @jedevc or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot related questions.
+If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot related questions.
 
 Have fun, and please be respectful! 
