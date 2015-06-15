@@ -41,8 +41,6 @@ Restart @BotBot.
 
     !restart @BotBot
 
-To restart @BotBot, type "!restart @BotBot".
-
 ## Syntax
 - Regex -> Response
 - Regex -> [List, of, responses, from, which, to, randomly, choose]
