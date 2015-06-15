@@ -1,16 +1,15 @@
 from websocket import create_connection, WebSocketConnectionClosedException
 import json
 import time
-import datetime
 import sys
 import os
 import random
 import threading
 import re
 
-def uniprint(message):
-    sys.stdout.buffer.write((message + '\n').encode('utf8'))
-    sys.stdout.buffer.flush()
+import logger
+
+log = logger.Logger()
 
 help_text = ""
 with open("data/help.txt") as f:
@@ -29,13 +28,13 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         if len(sys.argv) > 2:
             if len(sys.argv) > 3:
-                uniprint('Usage: python3 ' + sys.argv[0] + ' <room name> (default room: ' + room_name + ') <nickname> (default nickname: ' + nickname + ')')
+                print('Usage: python3 ' + sys.argv[0] + ' <room name> (default room: ' + room_name + ') <nickname> (default nickname: ' + nickname + ')')
                 sys.exit(1)
             nickname = sys.argv[2]
         room_name = sys.argv[1]
 
 web_socket_url = 'wss://euphoria.io/room/{}/ws'.format(room_name)
-uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Connecting to ' + web_socket_url + ' as ' + nickname + '...')
+log.log('Connecting to ' + web_socket_url + ' as ' + nickname + '...')
 ws = create_connection(web_socket_url)
 mid = 0
 agent_id = None
@@ -50,97 +49,97 @@ class bot_data_parser:
         if parse_string[i] == '\n':
             i += 1
         while i < len(parse_string):
-			if regex_mode:
-				arrow_match = re.match('\s*->\s*', parse_string[i:])
-				if arrow_match:
-					i += len(arrow_match.group(0))
-					regex_mode = False
-					self.array.append([re.compile(temp, re.IGNORECASE + re.UNICODE)])
-					temp = ''
-				else:
-					temp += parse_string[i]
-					i += 1
-			else:
-				temp = self.parse_response_string(parse_string[i:])
-				self.array[-1].append(temp[0])
-				i += len(temp[1])
-				temp = ''
-				semicolon_match = re.match(';\s*', parse_string[i:])
-				if semicolon_match:
-					i += len(semicolon_match.group(0))
-				else:
-					i += 1
-				regex_mode = True
+            if regex_mode:
+                arrow_match = re.match('\s*->\s*', parse_string[i:])
+                if arrow_match:
+                    i += len(arrow_match.group(0))
+                    regex_mode = False
+                    self.array.append([re.compile(temp, re.IGNORECASE + re.UNICODE)])
+                    temp = ''
+                else:
+                    temp += parse_string[i]
+                    i += 1
+            else:
+                temp = self.parse_response_string(parse_string[i:])
+                self.array[-1].append(temp[0])
+                i += len(temp[1])
+                temp = ''
+                semicolon_match = re.match(';\s*', parse_string[i:])
+                if semicolon_match:
+                    i += len(semicolon_match.group(0))
+                else:
+                    i += 1
+                regex_mode = True
 
     def load_array(self, array):
         self.array = array
 
     def get_messages(self, content, sender):
-		messages = []
-		for entry in self.array:
-			search_string = content
-			match = entry[0].search(search_string)
-			if match:
-				messages_to_add = self.parse_entry(entry[1])
-				groups = match.groups('')
-				i = 0
-				while i < len(messages_to_add):
-					j = len(groups) - 1
-					while j >= 0:
-						messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-						j -= 1
-					i += 1
-				messages.extend(messages_to_add)
-				continue
-			search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)')
-			match = entry[0].search(search_string)
-			if match:
-				messages_to_add = self.parse_entry(entry[1])
-				groups = match.groups('')
-				i = 0
-				while i < len(messages_to_add):
-					j = len(groups) - 1
-					while j >= 0:
-						messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-						j -= 1
-					i += 1
-				messages.extend(messages_to_add)
-				continue
-			search_string = content.replace(sender, '(sender)')
-			match = entry[0].search(search_string)
-			if match:
-				messages_to_add = self.parse_entry(entry[1])
-				groups = match.groups('')
-				i = 0
-				while i < len(messages_to_add):
-					j = len(groups) - 1
-					while j >= 0:
-						messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-						j -= 1
-					i += 1
-				messages.extend(messages_to_add)
-				continue
-			search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)').replace(sender, '(sender)')
-			match = entry[0].search(search_string)
-			if match:
-				messages_to_add = self.parse_entry(entry[1])
-				groups = match.groups('')
-				i = 0
-				while i < len(messages_to_add):
-					j = len(groups) - 1
-					while j >= 0:
-						messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-						j -= 1
-					i += 1
-				messages.extend(messages_to_add)
-				continue
-		return messages
+        messages = []
+        for entry in self.array:
+            search_string = content
+            match = entry[0].search(search_string)
+            if match:
+                messages_to_add = self.parse_entry(entry[1])
+                groups = match.groups('')
+                i = 0
+                while i < len(messages_to_add):
+                    j = len(groups) - 1
+                    while j >= 0:
+                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
+                        j -= 1
+                    i += 1
+                messages.extend(messages_to_add)
+                continue
+            search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)')
+            match = entry[0].search(search_string)
+            if match:
+                messages_to_add = self.parse_entry(entry[1])
+                groups = match.groups('')
+                i = 0
+                while i < len(messages_to_add):
+                    j = len(groups) - 1
+                    while j >= 0:
+                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
+                        j -= 1
+                    i += 1
+                messages.extend(messages_to_add)
+                continue
+            search_string = content.replace(sender, '(sender)')
+            match = entry[0].search(search_string)
+            if match:
+                messages_to_add = self.parse_entry(entry[1])
+                groups = match.groups('')
+                i = 0
+                while i < len(messages_to_add):
+                    j = len(groups) - 1
+                    while j >= 0:
+                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
+                        j -= 1
+                    i += 1
+                messages.extend(messages_to_add)
+                continue
+            search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)').replace(sender, '(sender)')
+            match = entry[0].search(search_string)
+            if match:
+                messages_to_add = self.parse_entry(entry[1])
+                groups = match.groups('')
+                i = 0
+                while i < len(messages_to_add):
+                    j = len(groups) - 1
+                    while j >= 0:
+                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
+                        j -= 1
+                    i += 1
+                messages.extend(messages_to_add)
+                continue
+        return messages
 
     def get_regexes(self):
-		regexes = []
-		for entry in self.array:
-			regexes.append(entry[0].pattern)
-		return regexes
+        regexes = []
+        for entry in self.array:
+            regexes.append(entry[0].pattern)
+        return regexes
 
     def parse_entry(self, parsed_data):
         result_strings = []
@@ -267,9 +266,9 @@ class bot_thread (threading.Thread):
         self.creator = creator
         self.help_text = '@' + self.nickname + ' is a bot created by \"' + creator + '\" using @' + nickname + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + '\n'.join(self.data.get_regexes()) + '\n\nTo pause this bot, use the command !pause @' + self.nickname + '.\nTo kill this bot, use the command !kill @' + self.nickname + '.'
         self.pause_text = ''
-        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Connecting to ' + self.web_socket_url + '...')
+        log.log('Connecting to ' + self.web_socket_url + '...')
         self.ws = create_connection(self.web_socket_url)
-        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Connected!')
+        log.log('[' + self.nickname + '] Connected!')
         self.thread_send_nick()
     def run(self):
         while not self.is_dead():
@@ -284,10 +283,10 @@ class bot_thread (threading.Thread):
             except WebSocketConnectionClosedException:
                 if self.is_dead():
                     return
-                uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Disconnected. Attempting to reconnect...')
+                log.log('[' + self.nickname + '] Disconnected. Attempting to reconnect...')
                 self.ws = create_connection(web_socket_url)
                 self.thread_send_nick()
-                uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Reconnected!')
+                log.log('[' + self.nickname + '] Reconnected!')
                 data = self.ws.recv()
                 if self.is_dead():
                     self.ws.close()
@@ -374,10 +373,10 @@ class bot_thread (threading.Thread):
         elif len(content) > 0 and content[0] == '!':
             if len(content) >= 5 and content[1:5].lower() == 'ping':
                 self.thread_send_message('Pong!', this_message)
-                uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Ponged to a ping from \"' + sender + '\".')
+                log.log('[' + self.nickname + '] Ponged to a ping from \"' + sender + '\".')
             elif (len(content) == 7 + len(self.nickname) or (len(content) >= 7 + len(self.nickname) and content[7+len(self.nickname)] == ' ')) and content[1:7+len(self.nickname)].lower() == ('help @' + self.nickname).lower():
                 self.thread_send_message(self.help_text, this_message)
-                uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Sent help text to \"' + sender + '\".')
+                log.log('[' + self.nickname + '] Sent help text to \"' + sender + '\".')
 
     def thread_send(self, message):
         try:
@@ -409,7 +408,7 @@ class bot_thread (threading.Thread):
             bots.remove(self)
         except ValueError:
             pass
-        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Exiting.')
+        log.log('[' + self.nickname + '] Exiting.')
     def announce_and_kill(self, parent=None):
         try:
             self.thread_send_message('/me is now exiting.', parent)
@@ -488,7 +487,7 @@ def create_snapshot(this_message=None, sender='(System)'):
         file.close()
         send_message('To load this snapshot later, type \"!load @' + nickname + ' ' + filename + '\".', this_message)
         send_message('Snapshot summary:\n' + '\n'.join(bot_names), this_message)
-        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Created snapshot and sent to \"' + sender + '\".')
+        log.log('Created snapshot and sent to \"' + sender + '\".')
         return filepath
     except:
         send_message('Failed to create snapshot.')
@@ -521,10 +520,10 @@ def load_snapshot(filename, this_message=None, sender='(system)'):
                 pass
             bot.start()
         send_message('Successfully loaded snapshot.', this_message)
-        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Loaded snapshot at \"' + filename + '\" from \"' + sender + '\".')
+        log.log('Loaded snapshot at \"' + filename + '\" from \"' + sender + '\".')
     except:
         send_message('Failed to load snapshot.', this_message)
-        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Failed to load snapshot at \"' + filename + '\" from \"' + sender + '\".')
+        log.log('Failed to load snapshot at \"' + filename + '\" from \"' + sender + '\".')
 
 def killall_and_load_snapshot(filename, this_message=None, sender='(system)'):
     global bots
@@ -546,8 +545,8 @@ def killall_and_load_snapshot(filename, this_message=None, sender='(system)'):
 
 send_nick()
 send_message('/me Hello, world!')
-uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Connected!')
-uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Attempting to load most recent snapshot...')
+log.log('Connected!')
+log.log('Attempting to load most recent snapshot...')
 latest_snapshot_filename = None
 latest_snapshot = None
 snapshot_matching_regex = re.compile('^(\\d+)-(\\d+)-(\\d+)_(\\d\\d)(\\d\\d)(\\d\\d)(?:_(\\d+))?\.json$', re.IGNORECASE)
@@ -608,10 +607,10 @@ while True:
     try:
         data = ws.recv()
     except WebSocketConnectionClosedException:
-        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Disconnected. Attempting to reconnect...')
+        log.log('Disconnected. Attempting to reconnect...')
         ws = create_connection(web_socket_url)
         send_nick()
-        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Reconnected!')
+        log.log(' Reconnected!')
         data = ws.recv()
     data = json.loads(data)
     if data['type'] == 'ping-event':
@@ -629,7 +628,7 @@ while True:
         if len(content) > 0 and content[0] == '!':
             if content[1:].lower() == 'ping':
                 send_message('Pong!', this_message)
-                uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Ponged to a ping from \"' + sender + '\".')
+                log.log('Ponged to a ping from \"' + sender + '\".')
             elif (len(content) == 7 + len(nickname) or (len(content) >= 7 + len(nickname) and content[7+len(nickname)] == ' ')) and content[1:7+len(nickname)].lower() == ('list @' + nickname).lower():
                 dont_respond = False
                 for bot in bots:
@@ -658,7 +657,7 @@ while True:
                     send_message('No bots created with @' + nickname + ' are running.', this_message)
                 else:
                     send_message('Currently running bots created with @' + nickname + ':\n' + '\n'.join(bot_names), this_message)
-                uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Listed bots by request from \"' + sender + '\".')
+                log.log('Listed bots by request from \"' + sender + '\".')
             elif (len(content) == 7 + len(nickname) or (len(content) >= 7 + len(nickname) and content[7+len(nickname)] == ' ')) and content[1:7+len(nickname)].lower() == ('help @' + nickname).lower():
                 dont_respond = False
                 for bot in bots:
@@ -668,7 +667,7 @@ while True:
                 if dont_respond:
                     continue
                 send_message(help_text, this_message)
-                uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Sent help text to \"' + sender + '\".')
+                log.log('Sent help text to \"' + sender + '\".')
             elif (len(content) == 10 + len(nickname) or (len(content) >= 10 + len(nickname) and content[10+len(nickname)] == ' ')) and content[1:10+len(nickname)].lower() == ('killall @' + nickname).lower():
                 dont_respond = False
                 for bot in bots:
@@ -680,7 +679,7 @@ while True:
                 send_message('Killing all bots...', this_message)
                 while len(bots) > 0:
                     bots.pop().announce_and_kill(this_message)
-                uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Killed all bots by request from \"' + sender + '\".')
+                log.log('Killed all bots by request from \"' + sender + '\".')
             elif len(content) > 13 and content[1:12].lower() == 'createbot @':
                 dont_respond = False
                 for bot in bots:
@@ -699,7 +698,7 @@ while True:
                     bots.append(bot)
                     bot.start()
                     send_message('Created @' + bot_nickname + '.', this_message)
-                    uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Created @' + bot_nickname + ' by request from \"' + sender + '\".')
+                    log.log('Created @' + bot_nickname + ' by request from \"' + sender + '\".')
                 except:
                     send_message('Failed to create @' + bot_nickname + '. Is your code valid?', this_message)
                     send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
@@ -723,7 +722,7 @@ while True:
                     bots.append(bot)
                     bot.start()
                     send_message('Created @' + bot_nickname + ' in ' + parse_tree[1].lower() + '.', this_message)
-                    uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Created @' + bot_nickname + ' by request from \"' + sender + '\" in &' + parse_tree[1][1:].lower() + '.')
+                    log.log('Created @' + bot_nickname + ' by request from \"' + sender + '\" in &' + parse_tree[1][1:].lower() + '.')
                 except:
                     send_message('Failed to create @' + bot_nickname + ' in ' + parse_tree[1].lower() + '. Is your code valid?', this_message)
                     send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
@@ -746,7 +745,7 @@ while True:
                     bots.append(bot)
                     bot.start()
                     send_message('Created @' + bot_nickname + '.', this_message)
-                    uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Created @' + bot_nickname + ' by request from \"' + sender + '\".')
+                    log.log('Created @' + bot_nickname + ' by request from \"' + sender + '\".')
                 except:
                     send_message('Failed to create @' + bot_nickname + '. Is your code valid?', this_message)
                     send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
@@ -771,7 +770,7 @@ while True:
                     bots.append(bot)
                     bot.start()
                     send_message('Created @' + bot_nickname + ' in ' + parse_tree[1].lower() + '.', this_message)
-                    uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Created @' + bot_nickname + ' by request from \"' + sender + '\" in &' + parse_tree[1][1:].lower() + '.')
+                    log.log('Created @' + bot_nickname + ' by request from \"' + sender + '\" in &' + parse_tree[1][1:].lower() + '.')
                 except:
                     send_message('Failed to create @' + bot_nickname + ' in ' + parse_tree[1].lower() + '. Is your code valid?', this_message)
                     send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
@@ -801,7 +800,7 @@ while True:
                         bots.append(bot)
                         bot.start()
                         send_message('Created @' + bot_nickname + ' in ' + parse_tree[1].lower() + '.', this_message)
-                        uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Copied @' + bot_nickname + ' by request from \"' + sender + '\" to &' + parse_tree[1][1:].lower() + '.')
+                        log.log('Copied @' + bot_nickname + ' by request from \"' + sender + '\" to &' + parse_tree[1][1:].lower() + '.')
                     except:
                         send_message('Failed to create @' + bot_nickname + ' in ' + parse_tree[1].lower() + '. Is your code valid?', this_message)
                         send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
@@ -814,7 +813,7 @@ while True:
                             bots.append(bot)
                             bot.start()
                             send_message('Created @' + bot_nickname + ' in ' + parse_tree[1].lower() + '.', this_message)
-                            uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] Copied @' + bot_nickname + ' by request from \"' + sender + '\" to &' + parse_tree[1][1:].lower() + '.')
+                            log.log('Copied @' + bot_nickname + ' by request from \"' + sender + '\" to &' + parse_tree[1][1:].lower() + '.')
                         except:
                             send_message('Failed to create @' + bot_nickname + ' in ' + parse_tree[1].lower() + '. Is your code valid?', this_message)
                             send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
