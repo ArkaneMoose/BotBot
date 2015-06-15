@@ -44,10 +44,10 @@ Restart @BotBot.
 To restart @BotBot, type "!restart @BotBot".
 
 ## Syntax
-Regex -> Response
-Regex -> [List, of, responses, from, which, to, randomly, choose]
-Regex -> {Multiple, responses, to, a, single, message}
-Regex 1 -> Response 1; Regex 2 -> Response 2
+- Regex -> Response
+- Regex -> [List, of, responses, from, which, to, randomly, choose]
+- Regex -> {Multiple, responses, to, a, single, message}
+- Regex 1 -> Response 1; Regex 2 -> Response 2
 
 These can be nested:  
 Regex -> {[a, {b, c}], d}
