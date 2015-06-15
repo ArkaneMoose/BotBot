@@ -1,46 +1,78 @@
 # @BotBot
-A meta-bot for [Euphoria](https://euphoria.io/)  
-@BotBot is a bot created by @myhandsaretypingwords that creates other bots.
+A bot for [Euphoria](https://euphoria.io/) created by @myhandsaretypingwords that creates other bots.
 
 ## Usage
+Create a bot with @BotName with some code.
 
-How to use:  
-!createbot @BotName code  
-!createbot &room @BotName code
+    !createbot @BotName CODE
+***
+Same as the previous but specify the room to put the bot in.
 
-The syntax is simple:  
-Regex -> Response  
-Regex -> [List, of, responses, from, which, to, randomly, choose]  
-Regex -> {Multiple, responses, to, a, single, message}  
+    !createbot &room @BotName CODE
+***
+List all the bots that are currently running and have been created by this bot.
+
+    !list @BotBot
+***
+Kill a bot with the name @BotName.
+
+    !kill @BotName
+***
+Pause a bot with the name @BotName.
+
+    !pause @BotName
+***
+Kill all the bots created by @BotBot.
+
+    !killall @BotName
+***
+Take a snapshot of the state of @BotBot.
+
+    !save @BotBot
+***
+Load the latest snapshot.
+
+    !load @BotBot latest
+Load a snapshot with a specific file name.
+
+    !load @BotBot FILENAME
+***
+Restart @BotBot.
+
+    !restart @BotBot
+
+To restart @BotBot, type "!restart @BotBot".
+
+## Syntax
+Regex -> Response
+Regex -> [List, of, responses, from, which, to, randomly, choose]
+Regex -> {Multiple, responses, to, a, single, message}
 Regex 1 -> Response 1; Regex 2 -> Response 2
 
 These can be nested:  
 Regex -> {[a, {b, c}], d}
 
-Responses can be no-ops. Simply use an empty string as the response, and no message will be displayed.  
+Arguments can be left out. Simply use an empty string as the response, and no message will be displayed.  
 This can be useful in lists; for example, [Lorem ipsum,,,] would display "Lorem ipsum" in response to the trigger only 1/4 of the time.
 
-Responses can also use the username of the sender of the message that triggered the response.  
+## Specials
+Responses can also use the username of the sender of the message that triggered the response.
 Just use (sender) in the response to include the sender's name with spaces, and (@sender) to include an at-mention for the sender.
 
-For those of you who don't know, "regex" stands for "regular expression", and is a way of doing pattern matching.  
-You can find a good tutorial and reference at [regular-expressions.info](http://regular-expressions.info/). (@myhandsaretypingwords is not affiliated with regular-expressions.info.)  
-Of course, you can ask @myhandsaretypingwords or the Euphorians in [&programming](https://euphoria.io/room/programming/) for help with regexes.
-
-@BotBot has several anti-spam features to stop spammy bots that it creates.  
-- Bots may not interact with @BotBot.  
-- Bots may not send the "!ping" command.  
-- Bots may not !restore, !pause, or !kill other bots.  
+## Spam
+@BotBot has several anti-spam features to stop spammy bots that it creates.
+- Bots may not interact with @BotBot.
+- Bots may not send the "!ping" command.
+- Bots may not !restore, !pause, or !kill other bots.
 - Bots that are triggered more than 10 times in 5 seconds are automatically paused.
 
-Have fun, and please be respectful!
+##Regexes
+For those of you who don't know, "regex" stands for "regular expression", and is a way of doing pattern matching.  
+You can find a good tutorial and reference [here](http://regular-expressions.info/).
 
-To see all bots created by this bot that are currently running, type "!list @BotBot".  
-To pause a bot created by this bot, type "!pause @BotName".  
-To kill a bot created by this bot, type "!kill @BotName".  
-To kill ALL bots created by this bot, type "!killall @BotBot".
+## Good luck!
+Good luck on your journey to becoming a bot programmer. 
 
-To take a snapshot of @BotBot's current state, type "!save @BotBot".  
-Snapshots can be loaded again later by typing "!load @BotBot" followed by either the word "latest" or the snapshot filename, which is provided at the time the snapshot is taken.
+If you need help, you can ask @myhandsaretypingwords, @jedevc or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot related questions.
 
-To restart @BotBot, type "!restart @BotBot".
+Have fun, and please be respectful! 
