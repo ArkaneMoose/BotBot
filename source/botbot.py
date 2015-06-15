@@ -12,52 +12,13 @@ def uniprint(message):
         sys.stdout.buffer.write((message + '\n').encode('utf8'))
         sys.stdout.buffer.flush()
 
-help_text = '@BotBot: MAKING BOT CREATION EASY\n\
-@BotBot is a bot created by @myhandsaretypingwords that creates other bots.\n\
-\n\
-How to use:\n\
-!createbot @BotName code\n\
-!createbot &room @BotName code\n\
-\n\
-The syntax is simple:\n\
-Regex -> Response\n\
-Regex -> [List, of, responses, from, which, to, randomly, choose]\n\
-Regex -> {Multiple, responses, to, a, single, message}\n\
-Regex 1 -> Response 1; Regex 2 -> Response 2\n\
-\n\
-These can be nested:\n\
-Regex -> {[a, {b, c}], d}\n\
-\n\
-Responses can be no-ops. Simply use an empty string as the response, and no message will be displayed.\n\
-This can be useful in lists; for example, [Lorem ipsum,,,] would display \"Lorem ipsum\" in response to the trigger only 1/4 of the time.\n\
-\n\
-Responses can also use the username of the sender of the message that triggered the response.\n\
-Just use (sender) in the response to include the sender\'s name with spaces, and (@sender) to include an at-mention for the sender.\n\
-\n\
-For those of you who don\'t know, \"regex\" stands for \"regular expression\", and is a way of doing pattern matching.\n\
-You can find a good tutorial and reference at http://www.regular-expressions.info/. (@myhandsaretypingwords is not affiliated with http://www.regular-expressions.info/.)\n\
-Of course, you can ask @myhandsaretypingwords or the Euphorians in &programming for help with regexes.\n\
-\n\
-@BotBot has several anti-spam features to stop spammy bots that it creates.\n\
-- Bots may not interact with @BotBot.\n\
-- Bots may not send the \"!ping\" command.\n\
-- Bots may not !restore, !pause, or !kill other bots.\n\
-- Bots that are triggered more than 5 times in 3 seconds are automatically paused.\n\
-\n\
-Have fun, and please be respectful!\n\
-\n\
-To see all bots created by this bot that are currently running, type \"!list @BotBot\".\n\
-To pause a bot created by this bot, type \"!pause @BotName\".\n\
-To kill a bot created by this bot, type \"!kill @BotName\".\n\
-To kill ALL bots created by this bot, type \"!killall @BotBot\".\n\
-\n\
-To take a snapshot of @BotBot\'s current state, type \"!save @BotBot\".\n\
-Snapshots can be loaded again later by typing \"!load @BotBot\" followed by either the word \"latest\" or the snapshot filename, which is provided at the time the snapshot is taken.\n\
-\n\
-To restart @BotBot, type \"!restart @BotBot\".'
-room_name = 'test'
+help_text = ""
+with open("data/help.txt") as f:
+    help_text = f.read()
+
+room_name = 'testing'
 nickname = 'BotBot'
-snapshot_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'BotBot Snapshots')
+snapshot_dir = 'snapshots'
 
 bots = []
 
@@ -79,102 +40,6 @@ ws = create_connection(web_socket_url)
 mid = 0
 agent_id = None
 
-##class ParseError(Exception):
-##        def __init__(self, value):
-##                self.value = value
-##        def __str__(self):
-##                return repr(self.value)
-##
-##class literal_string_matcher:
-##        def __init__(self, string):
-##                self.string = string
-##        def search(string_to_search):
-##                return string in string_to_search
-##
-##class bot_data_parser_:
-##        def __init__(self, parse_string):
-##                parsed_array = []
-##                lines = parse_string.split('\n')
-##                temp_text = ''
-##                match_pattern_parsing_mode = True
-##                i = -1
-##                while i + 1 < len(lines):
-##                        i += 1
-##                        line = lines[i]
-##                        if line.startswith('#'):
-##                                continue
-##                        if match_pattern_parsing_mode:
-##                                if line.startswith('/'):
-##                                        temp_text = ''
-##                                        modifiers = 0
-##                                        j = 1
-##                                        while j <= len(line):
-##                                                if j == len(line):
-##                                                        raise ParseError('ParseError at line ' + str(i + 1) + ':\n' + line + '\nRegular expression has no closing /')
-##                                                if line[j] == '\\' and j < len(line) - 1 and line[j + 1] == '/':
-##                                                        temp_text += '/'
-##                                                        j += 2
-##                                                        continue
-##                                                if line[j] == '/':
-##                                                        j += 1
-##                                                        break
-##                                                temp_text += line[j]
-##                                                j += 1
-##                                        while j <= len(line):
-##                                                if j == len(line):
-##                                                        raise ParseError('ParseError at line ' + str(i + 1) + ':\n' + line + '\nMatch pattern line does not end with :')
-##                                                if line[j].lower() == 'i':
-##                                                        modifiers += re.IGNORECASE
-##                                                        j += 1
-##                                                        continue
-##                                                if line[j].lower() == 'm':
-##                                                        modifiers += re.MULTILINE
-##                                                        j += 1
-##                                                        continue
-##                                                if line[j].lower() == 's':
-##                                                        modifiers += re.DOTALL
-##                                                        j += 1
-##                                                        continue
-##                                                if line[j] == ':':
-##                                                        j += 1
-##                                                        break
-##                                                j += 1
-##                                        parsed_array.append([re.compile(temp_text, modifiers)])
-##                                else:
-##                                        temp_text = ''
-##                                        j = 0
-##                                        while j <= len(line):
-##                                                if j == len(line):
-##                                                        raise ParseError('ParseError at line ' + str(i + 1) + ':\n' + line + '\nMatch pattern line does not end with :')
-##                                                if line[j] == '\\' and j < len(line) - 1 and line[j + 1] == '/':
-##                                                        temp_text = '/'
-##                                                        j += 2
-##                                                        continue
-##                                                if line[j] == '\\' and j < len(line) - 1 and line[j + 1] == '\\':
-##                                                        temp_text = '\\'
-##                                                        j += 2
-##                                                        continue
-##                                                if line[j] == '\\' and j < len(line) - 1 and line[j + 1] == ':':
-##                                                        temp_text = ':'
-##                                                        j += 2
-##                                                        continue
-##                                                if line[j] == '\\' and j < len(line) - 1 and line[j + 1] == 'n':
-##                                                        temp_text = '\n'
-##                                                        j += 2
-##                                                        continue
-##                                                if line[j] == ':':
-##                                                        j += 1
-##                                                        break
-##                                                temp_text += line[j]
-##                                                j += 1
-##                                        parsed_array.append([literal_string_matcher(temp_text)])
-##                                while j < len(line):
-##                                        if line[j] != ' ':
-##                                                lines[i] == line[j:]
-##                                                i -= 1
-##                        else:
-##                                
-                                
 class bot_data_parser:
         def __init__(self, parse_string):
                 temp = ''
@@ -222,7 +87,7 @@ class bot_data_parser:
 
         def load_array(self, array):
                 self.array = array
-                                
+
         def get_messages(self, content, sender):
                 messages = []
                 for entry in self.array:
@@ -282,8 +147,6 @@ class bot_data_parser:
                                         i += 1
                                 messages.extend(messages_to_add)
                                 continue
-                        ##elif entry[0].search(content.replace('@' + sender.replace(' ', ''), '(@sender)').replace(sender, '(sender)')):
-                        ##        messages.extend(self.parse_entry(entry[1]))
                 return messages
 
         def get_regexes(self):
@@ -366,23 +229,6 @@ class bot_data_parser:
                                                         temp2.append([0, temp[i]])
                                                         i += 1
                                                         continue
-##                                elif temp[i][0] == '{':
-##                                        j = i
-##                                        brackets = 0
-##                                        braces = 1
-##                                        while brackets > 0 and braces > 0 and j < len(temp):
-##                                                if len(temp[j]) == 0:
-##                                                        continue
-##                                                if temp[j][0] == '[':
-##                                                        brackets += 1
-##                                                if temp[j][-1] == ']':
-##                                                        brackets -= 1
-##                                                if temp[j][0] == '{':
-##                                                        braces += 1
-##                                                if temp[j][-1] == '}':
-##                                                        braces -= 1
-##                                        temp2.append(self.parse_response_string(''.join(temp[i:j+1])))
-##                                        i = j + 1
                                 else:
                                         temp2.append(self.parse_response_string(temp[i]))
                                         i += 1
@@ -409,8 +255,6 @@ class bot_thread (threading.Thread):
                 self.ws = create_connection(self.web_socket_url)
                 uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Connected!')
                 self.thread_send_nick()
-##                if self.web_socket_url != web_socket_url:
-##                        self.thread_send_message('Hello! I am @' + self.nickname + ', a bot created by ' + self.creator + ' using @BotBot, located in &' + room_name + '. If I get spammy, you can kill me using the command \"!kill @' + self.nickname + '\". For more help about this bot, type \"!help @' + nickname + '\".')
         def run(self):
                 while not self.is_dead():
                         try:
@@ -446,7 +290,7 @@ class bot_thread (threading.Thread):
                                 sender_agent_id = data['data']['sender']['id']
                                 self.recv_message(content, parent, this_message, sender, send_time, sender_agent_id, self.room_name)
                 self.finished = True
-        
+
         def recv_message(self, content='', parent=None, this_message=None, sender='', send_time=0, sender_agent_id='', room_name=''):
                 if sender_agent_id == agent_id:
                         return
@@ -518,7 +362,7 @@ class bot_thread (threading.Thread):
                         elif (len(content) == 7 + len(self.nickname) or (len(content) >= 7 + len(self.nickname) and content[7+len(self.nickname)] == ' ')) and content[1:7+len(self.nickname)].lower() == ('help @' + self.nickname).lower():
                                 self.thread_send_message(self.help_text, this_message)
                                 uniprint('[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] [' + self.nickname + '] Sent help text to \"' + sender + '\".')
-        
+
         def thread_send(self, message):
                 try:
                         self.ws.send(message)
@@ -743,7 +587,7 @@ if latest_snapshot == None:
         send_message('Found no snapshots to restore.')
 else:
         load_snapshot(latest_snapshot_filename)
-        
+
 while True:
         try:
                 data = ws.recv()
