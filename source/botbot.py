@@ -6,9 +6,10 @@ import os
 import random
 import threading
 import re
+import traceback
 
 import logger
-import parser
+import botparser
 
 log = logger.Logger()
 
@@ -298,7 +299,7 @@ def load_snapshot(filename, this_message=None, sender='(system)'):
         packed_bots = json.load(file)
         file.close()
         for packed_bot in packed_bots:
-            bot = bot_thread(packed_bot['nickname'][:36], parser.Parser(packed_bot['data']), packed_bot['room'], packed_bot['creator'])
+            bot = bot_thread(packed_bot['nickname'][:36], botparser.Parser(packed_bot['data']), packed_bot['room'], packed_bot['creator'])
             bots.append(bot)
             try:
                 bot.paused = packed_bot['paused']
@@ -483,7 +484,7 @@ while True:
                     continue
                 bot_nickname = parse_tree[1][1:][:36]
                 try:
-                    bot_data = parser.Parser(parse_tree[2])
+                    bot_data = botparser.Parser(parse_tree[2])
                     bot = bot_thread(bot_nickname, bot_data, room_name, sender)
                     bots.append(bot)
                     bot.start()
@@ -491,7 +492,7 @@ while True:
                     log.log('Created @' + bot_nickname + ' by request from \"' + sender + '\".')
                 except:
                     send_message('Failed to create @' + bot_nickname + '. Is your code valid?', this_message)
-                    send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
+                    send_message('Error details:\n' + ''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])), this_message)
             elif len(content) > 13 and content[1:12].lower() == 'createbot &':
                 dont_respond = False
                 for bot in bots:
@@ -507,7 +508,7 @@ while True:
                     continue
                 bot_nickname = parse_tree[2][1:][:36]
                 try:
-                    bot_data = parser.Parser(parse_tree[3])
+                    bot_data = botparser.Parser(parse_tree[3])
                     bot = bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), sender)
                     bots.append(bot)
                     bot.start()
@@ -515,7 +516,7 @@ while True:
                     log.log('Created @' + bot_nickname + ' by request from \"' + sender + '\" in &' + parse_tree[1][1:].lower() + '.')
                 except:
                     send_message('Failed to create @' + bot_nickname + ' in ' + parse_tree[1].lower() + '. Is your code valid?', this_message)
-                    send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
+                    send_message('Error details:\n' + ''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])), this_message)
             elif len(content) > 17 and content[1:16].lower() == 'createtestbot @':
                 dont_respond = False
                 for bot in bots:
@@ -530,7 +531,7 @@ while True:
                     continue
                 bot_nickname = parse_tree[1][1:][:36]
                 try:
-                    bot_data = parser.Parser(parse_tree[2])
+                    bot_data = botparser.Parser(parse_tree[2])
                     bot = bot_thread(bot_nickname, bot_data, room_name, sender)
                     bots.append(bot)
                     bot.start()
@@ -538,7 +539,7 @@ while True:
                     log.log('Created @' + bot_nickname + ' by request from \"' + sender + '\".')
                 except:
                     send_message('Failed to create @' + bot_nickname + '. Is your code valid?', this_message)
-                    send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
+                    send_message('Error details:\n' + ''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])), this_message)
             elif len(content) > 17 and content[1:16].lower() == 'createtestbot &':
                 dont_respond = False
                 for bot in bots:
@@ -555,7 +556,7 @@ while True:
                     continue
                 bot_nickname = parse_tree[2][1:][:36]
                 try:
-                    bot_data = parser.Parser(parse_tree[3])
+                    bot_data = botparser.Parser(parse_tree[3])
                     bot = bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), sender)
                     bots.append(bot)
                     bot.start()
@@ -563,7 +564,7 @@ while True:
                     log.log('Created @' + bot_nickname + ' by request from \"' + sender + '\" in &' + parse_tree[1][1:].lower() + '.')
                 except:
                     send_message('Failed to create @' + bot_nickname + ' in ' + parse_tree[1].lower() + '. Is your code valid?', this_message)
-                    send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
+                    send_message('Error details:\n' + ''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])), this_message)
             elif len(content) > 11 and content[1:10].lower() == 'sendbot &':
                 desired_bots = []
                 parse_tree = content.split(' ', 4)
@@ -585,7 +586,7 @@ while True:
                     send_message('No bot named @' + bot_nickname + ' was found.', this_message)
                 elif len(desired_bots) == 1:
                     try:
-                        bot_data = parser.Parser(desired_bots[0].data.parse_string)
+                        bot_data = botparser.Parser(desired_bots[0].data.parse_string)
                         bot = bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), desired_bots[0].creator)
                         bots.append(bot)
                         bot.start()
@@ -593,12 +594,12 @@ while True:
                         log.log('Copied @' + bot_nickname + ' by request from \"' + sender + '\" to &' + parse_tree[1][1:].lower() + '.')
                     except:
                         send_message('Failed to create @' + bot_nickname + ' in ' + parse_tree[1].lower() + '. Is your code valid?', this_message)
-                        send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
+                        send_message('Error details:\n' + ''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])), this_message)
                 else:
                     try:
                         desired_bots = [desired_bots[int(parse_tree[3]) - 1]]
                         try:
-                            bot_data = parser.Parser(desired_bots[0].data.parse_string)
+                            bot_data = botparser.Parser(desired_bots[0].data.parse_string)
                             bot = bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), desired_bots[0].creator)
                             bots.append(bot)
                             bot.start()
@@ -606,7 +607,7 @@ while True:
                             log.log('Copied @' + bot_nickname + ' by request from \"' + sender + '\" to &' + parse_tree[1][1:].lower() + '.')
                         except:
                             send_message('Failed to create @' + bot_nickname + ' in ' + parse_tree[1].lower() + '. Is your code valid?', this_message)
-                            send_message('Error details:\n' + str(sys.exc_info()[0]) + ': ' + str(sys.exc_info()[1]), this_message)
+                            send_message('Error details:\n' + ''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])), this_message)
                     except:
                         bot_names = []
                         for bot in desired_bots:
