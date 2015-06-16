@@ -14,7 +14,7 @@ spam_threshold_time = 5
 bots = []
 
 class bot_thread(threading.Thread):
-    def __init__(self, nickname, data, roomname, creator, log=None):
+    def __init__(self, nickname, data, roomname, creator, botbot_agent_id=None, log=None):
         super().__init__()
 
         if log is None:
@@ -37,6 +37,7 @@ class bot_thread(threading.Thread):
         self.mid = 0
 
         self.agent_id = None
+        self.botbot_agent_id = botbot_agent_id
 
         #Bot text
         self.help_text = '@' + self.nickname + ' is a bot created by \"' + creator + '\" using @' + nickname + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + '\n'.join(self.data.get_regexes()) + '\n\nTo pause this bot, use the command !pause @' + self.nickname + '.\nTo kill this bot, use the command !kill @' + self.nickname + '.'
@@ -45,7 +46,7 @@ class bot_thread(threading.Thread):
         #Connections
         self.web_socket_url = 'wss://euphoria.io/room/{}/ws'.format(self.room_name)
 
-        self.log.write('Connecting to ' + self.web_socket_url + '...')
+        self.log.write('[' + self.nickname + '] Connecting to ' + self.web_socket_url + '...')
         self.ws = create_connection(self.web_socket_url)
 
         self.log.write('[' + self.nickname + '] Connected!')
@@ -89,6 +90,8 @@ class bot_thread(threading.Thread):
 
     def recv_message(self, content='', parent=None, this_message=None, sender='', send_time=0, sender_agent_id='', room_name=''):
         if sender_agent_id == self.agent_id:
+            return
+        if sender_agent_id == self.botbot_agent_id:
             return
         if (len(content) == 7 + len(self.nickname) or (len(content) >= 7 + len(self.nickname) and content[7+len(self.nickname)] == ' ')) and content[0:7+len(self.nickname)].lower() == ('!kill @' + self.nickname).lower():
             for bot in bots:

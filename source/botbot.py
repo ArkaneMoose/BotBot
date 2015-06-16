@@ -29,9 +29,6 @@ snapshot_dir = None
 
 bots = bt.bots
 
-spam_threshold_messages = 10
-spam_threshold_time = 5
-
 if __name__ == '__main__':
     if len(sys.argv) > 1:
         if len(sys.argv) > 2:
@@ -200,7 +197,7 @@ def load_snapshot(filename, this_message=None, sender='(system)'):
         packed_bots = json.load(file)
         file.close()
         for packed_bot in packed_bots:
-            bot = bt.bot_thread(packed_bot['nickname'][:36], bot_parser.Parser(packed_bot['data']), packed_bot['room'], packed_bot['creator'])
+            bot = bt.bot_thread(packed_bot['nickname'][:36], bot_parser.Parser(packed_bot['data']), packed_bot['room'], agent_id, packed_bot['creator'])
             bots.append(bot)
             try:
                 bot.paused = packed_bot['paused']
@@ -258,6 +255,8 @@ while True:
         send_ping()
     if data['type'] == 'nick-reply':
         agent_id = data['data']['id']
+        for bot in bots:
+            bot.botbot_agent_id = agent_id
     if data['type'] == 'send-event':
         content = data['data']['content']
         parent = data['data']['parent']
@@ -335,7 +334,7 @@ while True:
                 bot_nickname = parse_tree[1][1:][:36]
                 try:
                     bot_data = bot_parser.Parser(parse_tree[2])
-                    bot = bt.bot_thread(bot_nickname, bot_data, room_name, sender, log)
+                    bot = bt.bot_thread(bot_nickname, bot_data, room_name, sender, agent_id, log)
                     bots.append(bot)
                     bot.start()
                     send_message('Created @' + bot_nickname + '.', this_message)
@@ -359,7 +358,7 @@ while True:
                 bot_nickname = parse_tree[2][1:][:36]
                 try:
                     bot_data = bot_parser.Parser(parse_tree[3])
-                    bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), sender)
+                    bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), agent_id, sender)
                     bots.append(bot)
                     bot.start()
                     send_message('Created @' + bot_nickname + ' in ' + parse_tree[1].lower() + '.', this_message)
@@ -382,7 +381,7 @@ while True:
                 bot_nickname = parse_tree[1][1:][:36]
                 try:
                     bot_data = bot_parser.Parser(parse_tree[2])
-                    bot = bt.bot_thread(bot_nickname, bot_data, room_name, sender, log)
+                    bot = bt.bot_thread(bot_nickname, bot_data, room_name, sender, agent_id, log)
                     bots.append(bot)
                     bot.start()
                     send_message('Created @' + bot_nickname + '.', this_message)
@@ -407,7 +406,7 @@ while True:
                 bot_nickname = parse_tree[2][1:][:36]
                 try:
                     bot_data = bot_parser.Parser(parse_tree[3])
-                    bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), sender, log)
+                    bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), sender, agent_id, log)
                     bots.append(bot)
                     bot.start()
                     send_message('Created @' + bot_nickname + ' in ' + parse_tree[1].lower() + '.', this_message)
@@ -437,7 +436,7 @@ while True:
                 elif len(desired_bots) == 1:
                     try:
                         bot_data = bot_parser.Parser(desired_bots[0].data.parse_string)
-                        bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), desired_bots[0].creator, log)
+                        bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), desired_bots[0].creator, agent_id, log)
                         bots.append(bot)
                         bot.start()
                         send_message('Created @' + bot_nickname + ' in ' + parse_tree[1].lower() + '.', this_message)
@@ -450,7 +449,7 @@ while True:
                         desired_bots = [desired_bots[int(parse_tree[3]) - 1]]
                         try:
                             bot_data = bot_parser.Parser(desired_bots[0].data.parse_string)
-                            bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), desired_bots[0].creator, log)
+                            bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), desired_bots[0].creator, agent_id, log)
                             bots.append(bot)
                             bot.start()
                             send_message('Created @' + bot_nickname + ' in ' + parse_tree[1].lower() + '.', this_message)
