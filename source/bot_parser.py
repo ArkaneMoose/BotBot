@@ -25,11 +25,9 @@ class Parser:
                 self.array[-1].append(temp[0])
                 i += len(temp[1])
                 temp = ''
-                semicolon_match = re.match(';\s*', parse_string[i:])
-                if semicolon_match:
-                    i += len(semicolon_match.group(0))
-                else:
-                    i += 1
+                whitespace_match = re.match('\s*', parse_string[i:])
+                if whitespace_match:
+                    i += len(whitespace_match.group(0))
                 regex_mode = True
 
     def load_array(self, array):
