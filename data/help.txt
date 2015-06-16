@@ -60,4 +60,6 @@ Good luck on your journey to becoming a bot programmer.
 
 If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in &programming for help with any bot related questions.
 
-Have fun, and please be respectful! 
+Have fun, and please be respectful!
+
+@BotBot is open-source! Feel free to view the code, contribute, and report issues at https://github.com/ArkaneMoose/BotBot.
