@@ -47,15 +47,16 @@ Restart @BotBot.
 - Regex -> {Multiple, responses, to, a, single, message}
 - Regex 1 -> Response 1; Regex 2 -> Response 2
 
-These can be nested:  
-Regex -> {[a, {b, c}], d}
+These response methods can also be nested:
+- Regex -> [a, {b, c}]
 
 Arguments can be left out. Simply use an empty string as the response, and no message will be displayed.  
 This can be useful in lists; for example, [Lorem ipsum,,,] would display "Lorem ipsum" in response to the trigger only 1/4 of the time.
 
 ## Specials
-Responses can also use the username of the sender of the message that triggered the response.
-Just use (sender) in the response to include the sender's name with spaces, and (@sender) to include an at-mention for the sender.
+Message sender
+- "(sender)" to include the sender's name with spaces
+- "(@sender)" to include an at-mention of the sender
 
 ## Spam
 @BotBot has several anti-spam features to stop spammy bots that it creates.
@@ -71,6 +72,8 @@ You can find a good tutorial and reference [here](http://regular-expressions.inf
 ## Good luck!
 Good luck on your journey to becoming a bot programmer. 
 
-If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot related questions.
+There is always an instance of @BotBot up in [&bots](https://euphoria.io/room/bots/) for you to program. 
+
+If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot related questions. 
 
 Have fun, and please be respectful! 
