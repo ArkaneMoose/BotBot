@@ -14,7 +14,7 @@ from websocket import create_connection, WebSocketConnectionClosedException
 
 #Project modules
 import logger
-import botparser
+import bot_parser
 import bot_thread as bt
 
 log = logger.Logger()
@@ -137,7 +137,7 @@ def load_snapshot(filename, this_message=None, sender='(system)'):
         packed_bots = json.load(file)
         file.close()
         for packed_bot in packed_bots:
-            bot = bt.bot_thread(packed_bot['nickname'][:36], botparser.Parser(packed_bot['data']), packed_bot['room'], packed_bot['creator'])
+            bot = bt.bot_thread(packed_bot['nickname'][:36], bot_parser.Parser(packed_bot['data']), packed_bot['room'], packed_bot['creator'])
             bots.append(bot)
             try:
                 bot.paused = packed_bot['paused']
@@ -322,7 +322,7 @@ while True:
                     continue
                 bot_nickname = parse_tree[1][1:][:36]
                 try:
-                    bot_data = botparser.Parser(parse_tree[2])
+                    bot_data = bot_parser.Parser(parse_tree[2])
                     bot = bt.bot_thread(bot_nickname, bot_data, room_name, sender, log)
                     bots.append(bot)
                     bot.start()
@@ -346,7 +346,7 @@ while True:
                     continue
                 bot_nickname = parse_tree[2][1:][:36]
                 try:
-                    bot_data = botparser.Parser(parse_tree[3])
+                    bot_data = bot_parser.Parser(parse_tree[3])
                     bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), sender)
                     bots.append(bot)
                     bot.start()
@@ -369,7 +369,7 @@ while True:
                     continue
                 bot_nickname = parse_tree[1][1:][:36]
                 try:
-                    bot_data = botparser.Parser(parse_tree[2])
+                    bot_data = bot_parser.Parser(parse_tree[2])
                     bot = bt.bot_thread(bot_nickname, bot_data, room_name, sender, log)
                     bots.append(bot)
                     bot.start()
@@ -394,7 +394,7 @@ while True:
                     continue
                 bot_nickname = parse_tree[2][1:][:36]
                 try:
-                    bot_data = botparser.Parser(parse_tree[3])
+                    bot_data = bot_parser.Parser(parse_tree[3])
                     bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), sender, log)
                     bots.append(bot)
                     bot.start()
@@ -424,7 +424,7 @@ while True:
                     send_message('No bot named @' + bot_nickname + ' was found.', this_message)
                 elif len(desired_bots) == 1:
                     try:
-                        bot_data = botparser.Parser(desired_bots[0].data.parse_string)
+                        bot_data = bot_parser.Parser(desired_bots[0].data.parse_string)
                         bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), desired_bots[0].creator, log)
                         bots.append(bot)
                         bot.start()
@@ -437,7 +437,7 @@ while True:
                     try:
                         desired_bots = [desired_bots[int(parse_tree[3]) - 1]]
                         try:
-                            bot_data = botparser.Parser(desired_bots[0].data.parse_string)
+                            bot_data = bot_parser.Parser(desired_bots[0].data.parse_string)
                             bot = bt.bot_thread(bot_nickname, bot_data, parse_tree[1][1:].lower(), desired_bots[0].creator, log)
                             bots.append(bot)
                             bot.start()
