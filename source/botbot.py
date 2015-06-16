@@ -25,7 +25,7 @@ with open("data/help.txt") as f:
 
 room_name = 'testing'
 nickname = 'BotBot'
-snapshot_dir = 'snapshots'
+snapshot_dir = None
 
 bots = bt.bots
 
@@ -80,6 +80,9 @@ def send_nick(nick=nickname):
     mid += 1
 
 def create_snapshot(this_message=None, sender='(System)'):
+    if not snapshot_dir:
+        send_message('Snapshots are not enabled for this instance of @' + nickname + '.', this_message)
+        return
     global bots
     try:
         new_bots = []
@@ -123,6 +126,66 @@ def create_snapshot(this_message=None, sender='(System)'):
         return None
 
 def load_snapshot(filename, this_message=None, sender='(system)'):
+    if not snapshot_dir:
+        send_message('Snapshots are not enabled for this instance of @' + nickname + '.', this_message)
+        return
+    if filename.lower() == 'latest':
+        latest_snapshot_filename = None
+        latest_snapshot = None
+        snapshot_matching_regex = re.compile('^(\\d+)-(\\d+)-(\\d+)_(\\d\\d)(\\d\\d)(\\d\\d)(?:_(\\d+))?\.json$', re.IGNORECASE)
+        for snapshot in os.listdir(snapshot_dir):
+            m = snapshot_matching_regex.match(snapshot)
+            if m:
+                g = tuple(map(int, m.groups('0')))
+                if latest_snapshot == None:
+                    latest_snapshot = g
+                    latest_snapshot_filename = snapshot
+                    continue
+                if g[2] > latest_snapshot[2]:
+                    latest_snapshot = g
+                    latest_snapshot_filename = snapshot
+                    continue
+                if g[2] < latest_snapshot[2]:
+                    continue
+                if g[0] > latest_snapshot[0]:
+                    latest_snapshot = g
+                    latest_snapshot_filename = snapshot
+                    continue
+                if g[0] < latest_snapshot[0]:
+                    continue
+                if g[1] > latest_snapshot[1]:
+                    latest_snapshot = g
+                    latest_snapshot_filename = snapshot
+                    continue
+                if g[1] < latest_snapshot[1]:
+                    continue
+                if g[3] > latest_snapshot[3]:
+                    latest_snapshot = g
+                    latest_snapshot_filename = snapshot
+                    continue
+                if g[3] < latest_snapshot[3]:
+                    continue
+                if g[4] > latest_snapshot[4]:
+                    latest_snapshot = g
+                    latest_snapshot_filename = snapshot
+                    continue
+                if g[4] < latest_snapshot[4]:
+                    continue
+                if g[5] > latest_snapshot[5]:
+                    latest_snapshot = g
+                    latest_snapshot_filename = snapshot
+                    continue
+                if g[5] < latest_snapshot[5]:
+                    continue
+                if g[6] > latest_snapshot[6]:
+                    latest_snapshot = g
+                    latest_snapshot_filename = snapshot
+                    continue
+        if latest_snapshot == None:
+            send_message('Found no snapshots to restore.')
+        else:
+            load_snapshot(latest_snapshot_filename)
+        return
     send_message('Loading bots from snapshot: ' + filename, this_message)
     try:
         filepath = os.path.join(snapshot_dir, filename)
@@ -155,6 +218,9 @@ def load_snapshot(filename, this_message=None, sender='(system)'):
         log.write('Failed to load snapshot at \"' + filename + '\" from \"' + sender + '\".')
 
 def killall_and_load_snapshot(filename, this_message=None, sender='(system)'):
+    if not snapshot_dir:
+        send_message('Snapshots are not enabled for this instance of @' + nickname + '.', this_message)
+        return
     global bots
     send_message('A snapshot will be created so that the current state can be restored if necessary.', this_message)
     snapshot_filepath = create_snapshot(this_message, sender)
@@ -176,61 +242,7 @@ send_nick()
 send_message('/me Hello, world!')
 log.write('Connected!')
 log.write('Attempting to load most recent snapshot...')
-latest_snapshot_filename = None
-latest_snapshot = None
-snapshot_matching_regex = re.compile('^(\\d+)-(\\d+)-(\\d+)_(\\d\\d)(\\d\\d)(\\d\\d)(?:_(\\d+))?\.json$', re.IGNORECASE)
-for snapshot in os.listdir(snapshot_dir):
-    m = snapshot_matching_regex.match(snapshot)
-    if m:
-        g = tuple(map(int, m.groups('0')))
-        if latest_snapshot == None:
-            latest_snapshot = g
-            latest_snapshot_filename = snapshot
-            continue
-        if g[2] > latest_snapshot[2]:
-            latest_snapshot = g
-            latest_snapshot_filename = snapshot
-            continue
-        if g[2] < latest_snapshot[2]:
-            continue
-        if g[0] > latest_snapshot[0]:
-            latest_snapshot = g
-            latest_snapshot_filename = snapshot
-            continue
-        if g[0] < latest_snapshot[0]:
-            continue
-        if g[1] > latest_snapshot[1]:
-            latest_snapshot = g
-            latest_snapshot_filename = snapshot
-            continue
-        if g[1] < latest_snapshot[1]:
-            continue
-        if g[3] > latest_snapshot[3]:
-            latest_snapshot = g
-            latest_snapshot_filename = snapshot
-            continue
-        if g[3] < latest_snapshot[3]:
-            continue
-        if g[4] > latest_snapshot[4]:
-            latest_snapshot = g
-            latest_snapshot_filename = snapshot
-            continue
-        if g[4] < latest_snapshot[4]:
-            continue
-        if g[5] > latest_snapshot[5]:
-            latest_snapshot = g
-            latest_snapshot_filename = snapshot
-            continue
-        if g[5] < latest_snapshot[5]:
-            continue
-        if g[6] > latest_snapshot[6]:
-            latest_snapshot = g
-            latest_snapshot_filename = snapshot
-            continue
-if latest_snapshot == None:
-    send_message('Found no snapshots to restore.')
-else:
-    load_snapshot(latest_snapshot_filename)
+load_snapshot('latest')
 
 while True:
     try:
@@ -482,62 +494,6 @@ while True:
                 if dont_respond:
                     continue
                 filename = content.split(' ', 2)[2]
-                if filename.lower() == 'latest':
-                    latest_snapshot_filename = None
-                    latest_snapshot = None
-                    for snapshot in os.listdir(snapshot_dir):
-                        m = snapshot_matching_regex.match(snapshot)
-                        if m:
-                            g = tuple(map(int, m.groups('0')))
-                            if latest_snapshot == None:
-                                latest_snapshot = g
-                                latest_snapshot_filename = snapshot
-                                continue
-                            if g[2] > latest_snapshot[2]:
-                                latest_snapshot = g
-                                latest_snapshot_filename = snapshot
-                                continue
-                            if g[2] < latest_snapshot[2]:
-                                continue
-                            if g[0] > latest_snapshot[0]:
-                                latest_snapshot = g
-                                latest_snapshot_filename = snapshot
-                                continue
-                            if g[0] < latest_snapshot[0]:
-                                continue
-                            if g[1] > latest_snapshot[1]:
-                                latest_snapshot = g
-                                latest_snapshot_filename = snapshot
-                                continue
-                            if g[1] < latest_snapshot[1]:
-                                continue
-                            if g[3] > latest_snapshot[3]:
-                                latest_snapshot = g
-                                latest_snapshot_filename = snapshot
-                                continue
-                            if g[3] < latest_snapshot[3]:
-                                continue
-                            if g[4] > latest_snapshot[4]:
-                                latest_snapshot = g
-                                latest_snapshot_filename = snapshot
-                                continue
-                            if g[4] < latest_snapshot[4]:
-                                continue
-                            if g[5] > latest_snapshot[5]:
-                                latest_snapshot = g
-                                latest_snapshot_filename = snapshot
-                                continue
-                            if g[5] < latest_snapshot[5]:
-                                continue
-                            if g[6] > latest_snapshot[6]:
-                                latest_snapshot = g
-                                latest_snapshot_filename = snapshot
-                                continue
-                    if latest_snapshot == None:
-                        send_message('Found no snapshots to load.', this_message)
-                        continue
-                    else:
-                        filename = latest_snapshot_filename
                 killall_and_load_snapshot(filename, this_message, sender)
             elif (len(content) == 10 + len(nickname) or (len(content) >= 10 + len(nickname) and content[10+len(nickname)] == ' ')) and content[1:10+len(nickname)].lower() == ('restart @' + nickname).lower():
                 dont_respond = False
