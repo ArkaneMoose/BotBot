@@ -74,6 +74,6 @@ Good luck on your journey to becoming a bot programmer.
 
 There is always an instance of @BotBot up in [&bots](https://euphoria.io/room/bots/) for you to program. 
 
-If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot related questions. 
+If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot-related questions. 
 
 Have fun, and please be respectful! 
