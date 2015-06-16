@@ -177,6 +177,22 @@ class Parser:
                 continue
             elif data[i] == '\\':
                 i += 1
+                if re.match(r'\d', data[i]):
+                    # This backslash is for a backreference. Insert the backslash literally.
+                    if type(parsed[-1]) is str and not separate:
+                        parsed[-1] += '\\'
+                    elif parsed[0] != 0 and not separate:
+                        if type(parsed[-1]) is list and parsed[-1][0] == 0:
+                            if type(parsed[-1][-1]) is str:
+                                parsed[-1][-1] += '\\'
+                            else:
+                                parsed[-1].append('\\')
+                        else:
+                            parsed[-1] = [0, parsed[-1], '\\']
+                    else:
+                        parsed.append('\\')
+                        separate = False
+                # Insert the character after the backslash literally.
                 if type(parsed[-1]) is str and not separate:
                     parsed[-1] += data[i]
                 elif parsed[0] != 0 and not separate:
