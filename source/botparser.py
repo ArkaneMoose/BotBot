@@ -1,4 +1,5 @@
 import re
+import random
 
 class Parser:
     def __init__(self, parse_string):
@@ -7,7 +8,7 @@ class Parser:
         self.parse_string = parse_string
         regex_mode = True
         i = 0
-        while re.match(r'\s', parse_string[i]):
+        while i < len(parse_string) and re.match(r'\s', parse_string[i]):
             i += 1
         while i < len(parse_string):
             if regex_mode:
@@ -32,7 +33,7 @@ class Parser:
 
     def load_array(self, array):
         self.array = array
-
+    
     def get_messages(self, content, sender):
         messages = []
         for entry in self.array:
