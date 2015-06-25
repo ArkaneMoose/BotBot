@@ -16,16 +16,16 @@ from snapshot import Snapshot
 
 log = logger.Logger()
 
-help_text = ""
-with open("data/help.txt") as f:
-    help_text = f.read()
-
 class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdRoom):
-    def __init__(self, room_name, password, nickname):
+    def __init__(self, room_name, password, nickname, help_text=""):
         super().__init__(room_name, password)
+
         self.room_name = room_name.lower()
         self.nickname = nickname
         self.password = password
+
+        self.help_text = help_text
+
         bots.botbot = self
 
     def ready(self):
@@ -56,7 +56,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             # !help @BotBot
             match = EuphUtils.command('help', self.nickname).match(command)
             if match:
-                self.send_chat(help_text, msg_id)
+                self.send_chat(self.help_text, msg_id)
                 return
             # !killall @BotBot
             match = EuphUtils.command('killall', self.nickname).match(command)
