@@ -1,5 +1,6 @@
 #Standard library modules
 import sys
+import threading
 
 import re
 import traceback
@@ -11,7 +12,7 @@ from euphutils import EuphUtils
 #Project modules
 import logger
 import agentid_room
-from botcollection import BotCollection as bots
+from botcollection import BotCollection
 from snapshot import Snapshot
 
 log = logger.Logger()
@@ -26,10 +27,14 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
 
         self.help_text = help_text
 
-        bots.botbot = self
+        self.bots = BotCollection(self)
+        self.botthread = threading.Thread(target=self.bots.run)
 
     def ready(self):
         super().ready()
+
+        self.botthread.start()
+
         self.send_chat('/me Hello, world!')
         if Snapshot.is_enabled():
             messages = Snapshot.load('latest')[1]
@@ -37,7 +42,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                 self.send_chat(message, msg_id)
 
     def handle_chat(self, message):
-        if bots.is_bot(message['sender']['id']):
+        if self.bots.is_bot(message['sender']['id']):
             return
         if message['content'].startswith('!'):
             command = message['content'][1:]
@@ -51,7 +56,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             # !list @BotBot
             match = EuphUtils.command('list', self.nickname).match(command)
             if match:
-                self.send_chat('Currently running bots created with ' + EuphUtils.mention(self.nickname) + ':\n' + bots.get_description(), msg_id)
+                self.send_chat('Currently running bots created with ' + EuphUtils.mention(self.nickname) + ':\n' + self.bots.get_description(), msg_id)
                 return
             # !help @BotBot
             match = EuphUtils.command('help', self.nickname).match(command)
@@ -62,7 +67,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             match = EuphUtils.command('killall', self.nickname).match(command)
             if match:
                 self.send_chat('Killing all bots...', msg_id)
-                bots.killall()
+                self.bots.killall()
                 return
             # !createbot
             match = EuphUtils.command('createbot').match(command)
@@ -70,7 +75,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                 match = re.match(r'(?:&(\S+)\s+)?@(\S{1,36})\S*\s*(.*)', match.group(1), re.DOTALL)
                 if match:
                     try:
-                        bots.create(match.group(2), match.group(1).lower() if match.group(1) else self.room_name, None if match.group(1) else self.password, sender, match.group(3))
+                        self.bots.create(match.group(2), match.group(1).lower() if match.group(1) else self.room_name, None if match.group(1) else self.password, sender, match.group(3))
                         self.send_chat('Created ' + EuphUtils.mention(match.group(2)) + ((' in &' + match.group(1).lower()) if match.group(1) else '') + '.', msg_id)
                     except:
                         self.send_chat('Failed to create ' + EuphUtils.mention(match.group(2)) + ((' in &' + match.group(1).lower()) if match.group(1) else '') + '. Is your code valid?', msg_id)
@@ -104,7 +109,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                     for message in messages:
                         self.send_chat(message, msg_id)
                     self.send_chat('Killing all bots...', msg_id)
-                    bots.killall(False)
+                    self.bots.killall(False)
                     success, messages = Snapshot.load(match.group(0))
                     for message in messages:
                         self.send_chat(message, msg_id)
@@ -122,6 +127,11 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                 for message in messages:
                     self.send_chat(message, msg_id)
                 self.send_chat('Killing all bots...', msg_id)
-                bots.killall(False)
+                self.bots.killall(False)
                 self.send_chat('/me is restarting...', msg_id)
                 self.quit()
+
+    def cleanup(self):
+        self.bots.quit()
+
+        self.botthread.join()

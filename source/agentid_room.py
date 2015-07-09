@@ -7,8 +7,8 @@ class AgentIdRoom(room.Room):
     An agent ID room keeps track of your agent ID.
     """
 
-    def __init__(self, roomname, password=None):
-        super().__init__(roomname, password)
+    def __init__(self, roomname, password=None, attempts=None):
+        super().__init__(roomname, password, attempts)
 
         self.connection.add_callback(cn.PTYPE["REPLY"]["NICK"],
                                             self.handle_nickreply)
