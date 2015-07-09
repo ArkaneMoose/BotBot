@@ -1,6 +1,6 @@
 from euphutils import EuphUtils
 import euphoria as eu
-from botcollection import BotCollection as bots
+
 import time
 import re
 import agentid_room
@@ -9,8 +9,10 @@ spam_threshold_messages = 10
 spam_threshold_time = 5
 
 class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdRoom):
-    def __init__(self, room_name, password, nickname, creator, code_struct):
+    def __init__(self, room_name, password, nickname, creator, code_struct, bots):
         super().__init__(room_name, password)
+
+        self.bots = bots
 
         # Bot data
         self.code_struct = code_struct
@@ -20,7 +22,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
         self.room_name = room_name
         self.nickname = nickname
         self.creator = creator
-        self.help_text = EuphUtils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + ('using ' + EuphUtils.mention(bots.botbot.nickname) if bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + EuphUtils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + EuphUtils.mention(self.nickname) + '".'
+        self.help_text = EuphUtils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + ('using ' + EuphUtils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + EuphUtils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + EuphUtils.mention(self.nickname) + '".'
 
         # Bot state
         self.paused = False
@@ -33,7 +35,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
     def handle_chat(self, message):
         if message['sender']['id'] == self.agent_id:
             return
-        if bots.botbot and message['sender']['id'] == bots.botbot.agent_id:
+        if self.bots.botbot and message['sender']['id'] == self.bots.botbot.agent_id:
             return
 
         if 'parent' in message:
@@ -43,17 +45,17 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
 
     def recv_message(self, content='', parent=None, this_message=None, sender='', sender_agent_id='', send_time=0, room_name=''):
         if EuphUtils.command('!kill', self.nickname).match(content):
-            if bots.is_bot(sender_agent_id):
+            if self.bots.is_bot(sender_agent_id):
                 return
             self.kill(msg_id=this_message)
         elif self.paused and EuphUtils.command('!restore', self.nickname).match(content):
-            if bots.is_bot(sender_agent_id):
+            if self.bots.is_bot(sender_agent_id):
                 return
             self.send_chat('/me is now restored.', this_message)
             self.paused = False
             self.pause_text = ''
         elif EuphUtils.command('!pause', self.nickname).match(content):
-            if bots.is_bot(sender_agent_id):
+            if self.bots.is_bot(sender_agent_id):
                 return
             if self.paused:
                 self.send_chat('/me is already paused.', this_message)
@@ -90,7 +92,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
                         continue
                     match = re.match(r'!to\s+@(\S+)(?:\s+&(\S+))?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
                     if match:
-                        bots.interbot(match.group(1), match.group(2).lower() if match.group(2) else None, match.group(3), sender, sender_agent_id, send_time, room_name)
+                        self.bots.interbot(match.group(1), match.group(2).lower() if match.group(2) else None, match.group(3), sender, sender_agent_id, send_time, room_name)
                         continue
                     self.send_chat(message, this_message)
             elif content.startswith('!'):
@@ -102,5 +104,5 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
     def kill(self, announce=True, msg_id=None):
         if announce:
             self.send_chat('/me is now exiting.', msg_id)
-        bots.remove(self)
+        self.bots.remove(self)
         self.quit()

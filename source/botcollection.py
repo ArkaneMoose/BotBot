@@ -1,45 +1,47 @@
 from euphutils import EuphUtils
 from botparser import Parser
+from botbotbot import BotBotBot
+
 import euphoria as eu
 import threading
 
-class BotCollection:
-    botbot = None
-    bots = []
+class BotCollection(eu.execgroup.ExecGroup):
+    def __init__(self, botbot):
+        super().__init__(autostop=False)
 
-    def is_bot(agent_id):
-        if BotCollection.botbot and BotCollection.botbot.agent_id == agent_id:
+        self.botbot = botbot
+        self.bots = self.execs
+
+    def is_bot(self, agent_id):
+        if self.botbot and self.botbot.agent_id == agent_id:
             return True
-        for bot in BotCollection.bots:
+        for bot in self.bots:
             if bot.agent_id == agent_id:
                 return True
         return False
 
-    def get_description(bot=None):
+    def get_description(self, bot=None):
         if not bot:
-            if len(BotCollection.bots) == 0:
+            if len(self.bots) == 0:
                 return '(None)'
-            return '\n'.join(map(BotCollection.get_description, BotCollection.bots))
-        return EuphUtils.mention(bot.nickname) + ' (created by "' + bot.creator + '")' + ('' if BotCollection.botbot and BotCollection.botbot.room_name == bot.room_name else (' (in &' + bot.room_name.lower() + ')')) + (' (paused)' if bot.paused else '')
+            return '\n'.join(map(self.get_description, self.bots))
+        return EuphUtils.mention(bot.nickname) + ' (created by "' + bot.creator + '")' + ('' if self.botbot and self.botbot.room_name == bot.room_name else (' (in &' + bot.room_name.lower() + ')')) + (' (paused)' if bot.paused else '')
 
-    def killall(announce=True):
-        for bot in BotCollection.bots:
+    def killall(self, announce=True):
+        for bot in self.bots:
             bot.kill(announce)
 
-    def remove(bot):
+    def remove(self, bot):
         try:
-            BotCollection.bots.remove(bot)
+            self.bots.remove(bot)
         except ValueError:
             pass
 
-    def create(nickname, room_name, password, creator, code):
-        bot = BotBotBot(room_name, password, nickname, creator, Parser(code))
-        BotCollection.bots.append(bot)
-        threading.Thread(target=bot.run).start()
+    def create(self, nickname, room_name, password, creator, code):
+        bot = BotBotBot(room_name, password, nickname, creator, Parser(code), self)
+        self.add(bot)
 
-    def interbot(nickname, target_room_name, message, sender, send_time, sender_agent_id, room_name):
-        for bot in BotCollection.bots:
+    def interbot(self, nickname, target_room_name, message, sender, send_time, sender_agent_id, room_name):
+        for bot in self.bots:
             if bot.nickname.lower() == nickname.lower() and (not target_room_name or bot.room_name.lower() == target_room_name.lower()):
                 bot.recv_message(message, None, None, sender, sender_agent_id, send_time, room_name)
-
-from botbotbot import BotBotBot
