@@ -33,13 +33,15 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
     def ready(self):
         super().ready()
 
-        self.botthread.start()
-
         self.send_chat('/me Hello, world!')
         if Snapshot.is_enabled():
             messages = Snapshot.load('latest')[1]
             for message in messages:
                 self.send_chat(message, msg_id)
+
+    def run(self):
+        self.botthread.start()
+        super().run()
 
     def handle_chat(self, message):
         if self.bots.is_bot(message['sender']['id']):

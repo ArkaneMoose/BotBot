@@ -22,12 +22,8 @@ if __name__ == '__main__':
     if len(sys.argv) > 1:
         if len(sys.argv) > 2:
             if len(sys.argv) > 3:
-                if len(sys.argv) > 4:
-                    print('Usage: python3 ' + sys.argv[0] + ' <nickname> (default nickname: ' + nickname + ') + <room name> (default room: ' + room_name + ') <room password>')
-                    sys.exit(1)
-                password = sys.argv[3]
-            help_text = EuphUtils.mention_regex(nickname).sub(EuphUtils.mention(sys.argv[1]), help_text)
-            help_text = re.sub(r'\b' + nickname + r'\b', sys.argv[1], help_text, 0, re.IGNORECASE)
-            nickname = sys.argv[1]
-        room_name = sys.argv[2]
+                print('Usage: python3 ' + sys.argv[0] + ' <room name> (default room: ' + room_name + ') <room password>')
+                sys.exit(1)
+            password = sys.argv[2]
+        room_name = sys.argv[1]
     main()
