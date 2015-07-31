@@ -40,6 +40,7 @@ class BotCollection(eu.execgroup.ExecGroup):
     def create(self, nickname, room_name, password, creator, code):
         bot = BotBotBot(room_name, password, nickname, creator, Parser(code), self)
         self.add(bot)
+        return bot
 
     def interbot(self, nickname, target_room_name, message, sender, send_time, sender_agent_id, room_name):
         for bot in self.bots:

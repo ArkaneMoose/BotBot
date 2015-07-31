@@ -33,11 +33,11 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
     def ready(self):
         super().ready()
 
-        self.send_chat('/me Hello, world!')
+        self.send_chat('Hello, world!')
         if Snapshot.is_enabled():
-            messages = Snapshot.load('latest')[1]
+            messages = Snapshot.load('latest', self.bots)
             for message in messages:
-                self.send_chat(message, msg_id)
+                self.send_chat(message)
 
     def run(self):
         self.botthread.start()
@@ -85,6 +85,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                 else:
                     self.send_chat('It looks like you are trying to create a bot. Please make sure that you use the syntax described in ' + EuphUtils.mention(self.nickname) + '\'s help text, which can be viewed by sending the command "!help ' + EuphUtils.mention(self.nickname) + '".', msg_id)
                 return
+            #!sendbot
             match = EuphUtils.command('sendbot').match(command)
             if match:
                 match = re.match(r'(?:&(\S+)\s+)?@(\S{1,36})\S*', match.group(1), re.DOTALL)
@@ -93,12 +94,14 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                 else:
                     self.send_chat('It looks like you are trying to send a bot. Please make sure that you use the syntax described in ' + EuphUtils.mention(self.nickname) + '\'s help text, which can be viewed by sending the command "!help ' + EuphUtils.mention(self.nickname) + '".', msg_id)
                 return
+            #!save
             match = EuphUtils.command('save', self.nickname).match(command)
             if match:
-                messages = Snapshot.create()[1]
+                messages = Snapshot.create(self.bots)
                 for message in messages:
                     self.send_chat(message, msg_id)
                 return
+            #!load
             match = EuphUtils.command('load', self.nickname).match(command)
             if match:
                 match = re.match(r'([^\s\\/]+\.json\b|latest)', match.group(1), re.IGNORECASE)
@@ -107,25 +110,22 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                         self.send_chat('Snapshots are not enabled.', msg_id)
                         return
                     self.send_chat('A snapshot will be created so that the current state can be restored if necessary.', msg_id)
-                    backup_snapshot, messages = Snapshot.create()
+                    messages = Snapshot.create(self.bots)
                     for message in messages:
                         self.send_chat(message, msg_id)
                     self.send_chat('Killing all bots...', msg_id)
                     self.bots.killall(False)
-                    success, messages = Snapshot.load(match.group(0))
+
+                    messages = Snapshot.load(match.group(0), self.bots)
                     for message in messages:
                         self.send_chat(message, msg_id)
-                    if backup_snapshot and not success:
-                        self.send_chat('Reverting to snapshot created just now...', msg_id)
-                        messages = Snapshot.load(backup_snapshot)[1]
-                        for message in messages:
-                            self.send_chat(message, msg_id)
                 else:
                     self.send_chat('Please provide a valid filename.', msg_id)
                 return
+            #!restart
             match = EuphUtils.command('restart', self.nickname).match(command)
             if match:
-                messages = Snapshot.create()[1]
+                messages = Snapshot.create(self.bots)
                 for message in messages:
                     self.send_chat(message, msg_id)
                 self.send_chat('Killing all bots...', msg_id)

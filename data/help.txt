@@ -1,7 +1,8 @@
-@BotBot is a bot for Euphoria created by @myhandsaretypingwords that creates other bots.
+@BotBot is a bot for Euphoria created by @myhandsaretypingwords that creates
+other bots.
 
 Usage
-====================================================================================================
+================================================================================
 Create a bot with @BotName with some code.
     !createbot @BotName CODE
 Same as the previous but specify the room to put the bot in.
@@ -24,7 +25,7 @@ Restart @BotBot.
     !restart @BotBot
 
 Syntax
-====================================================================================================
+================================================================================
 - Regex -> Response
 - Regex -> [List, of, responses, from, which, to, randomly, choose]
 - Regex -> {Multiple, responses, to, a, single, message}
@@ -33,34 +34,40 @@ Syntax
 These response methods can also be nested:
 - Regex -> [a, {b, c}]
 
-Arguments can be left out. Simply use an empty string as the response, and no message will be displayed.  
-This can be useful in lists; for example, [Lorem ipsum,,,] would display "Lorem ipsum" in response to the trigger only 1/4 of the time.
+Arguments can be left out. Simply use an empty string as the response, and no
+message will be displayed.
+This can be useful in lists; for example, [Lorem ipsum,,,] would display
+"Lorem ipsum" in response to the trigger only 1/4 of the time.
 
 Specials
-====================================================================================================
+================================================================================
 Message sender
 - "(sender)" to include the sender's name with spaces
 - "(@sender)" to include an at-mention of the sender
 
 Spam
-====================================================================================================
+================================================================================
 @BotBot has several anti-spam features to stop spammy bots that it creates.
 - Bots may not interact with @BotBot.
 - Bots may not send the "!ping" command.
 - Bots may not !restore, !pause, or !kill other bots.
-- Bots that are triggered more than 10 times in 5 seconds are automatically paused.
+- Bots that are triggered more than 10 times in 5 seconds are automatically
+  paused.
 
 Regexes
-====================================================================================================
-For those of you who don't know, "regex" stands for "regular expression", and is a way of doing pattern matching.  
+================================================================================
+For those of you who don't know, "regex" stands for "regular expression", and is
+a way of doing pattern matching.
 You can find a good tutorial and reference at http://regular-expressions.info/.
 
 Good luck!
-====================================================================================================
-Good luck on your journey to becoming a bot programmer. 
+================================================================================
+Good luck on your journey to becoming a bot programmer.
 
-If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in &programming for help with any bot-related questions.
+If you need help, you can ask @myhandsaretypingwords, @nihizg, or any of the
+other awesome Euphorians in &programming for help with any bot-related questions.
 
 Have fun, and please be respectful!
 
-@BotBot is open-source! Feel free to view the code, contribute, and report issues at https://github.com/ArkaneMoose/BotBot.
+@BotBot is open-source! Feel free to view the code, contribute, and report
+issues at https://github.com/ArkaneMoose/BotBot.
