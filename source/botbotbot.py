@@ -87,7 +87,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
                 while len(self.last_times) > spam_threshold_messages - 1:
                     del self.last_times[0]
                 for raw_message in messages:
-                    message = raw_message.replace('(sender)', sender).replace('(@sender)', '@' + sender.replace(' ', '')).replace('(room)', room_name)
+                    message = raw_message.replace('(sender)', sender).replace('(@sender)', EuphUtils.mention(sender)).replace('(room)', room_name)
                     if EuphUtils.command('!ping').match(message):
                         continue
                     match = re.match(r'!to\s+@(\S+)(?:\s+&(\S+))?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
