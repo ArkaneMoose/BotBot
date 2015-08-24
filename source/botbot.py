@@ -51,7 +51,11 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             sender = message['sender']['name']
             msg_id = message['id']
             # !ping
-            match = EuphUtils.command('ping').match(command)
+            if command.lower() == 'ping':
+                self.send_chat('Pong!', msg_id)
+                return
+            # !ping @BotBot
+            match = EuphUtils.command('ping', self.nickname).match(command)
             if match:
                 self.send_chat('Pong!', msg_id)
                 return

@@ -96,7 +96,9 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
                         continue
                     self.send_chat(message, this_message)
             elif content.startswith('!'):
-                if EuphUtils.command('ping').match(content[1:]):
+                if content[1:].lower() == 'ping':
+                    self.send_chat('Pong!', this_message)
+                elif EuphUtils.command('ping', self.nickname).match(content[1:]):
                     self.send_chat('Pong!', this_message)
                 elif EuphUtils.command('help', self.nickname).match(content[1:]):
                     self.send_chat(self.help_text, this_message)
