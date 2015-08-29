@@ -9,6 +9,8 @@ Same as the previous but specify the room to put the bot in.
     !createbot &room @BotName CODE
 List all the bots that are currently running and have been created by @BotBot.
     !list @BotBot
+Send a bot with the name @BotName to the specified room.
+    !sendbot &room @BotName
 Kill a bot with the name @BotName.
     !kill @BotName
 Pause a bot with the name @BotName.
@@ -24,41 +26,9 @@ Load a snapshot with a specific file name.
 Restart @BotBot.
     !restart @BotBot
 
-Syntax
+More Info
 ================================================================================
-- Regex -> Response
-- Regex -> [List, of, responses, from, which, to, randomly, choose]
-- Regex -> {Multiple, responses, to, a, single, message}
-- Regex 1 -> Response 1; Regex 2 -> Response 2
-
-These response methods can also be nested:
-- Regex -> [a, {b, c}]
-
-Arguments can be left out. Simply use an empty string as the response, and no
-message will be displayed.
-This can be useful in lists; for example, [Lorem ipsum,,,] would display
-"Lorem ipsum" in response to the trigger only 1/4 of the time.
-
-Specials
-================================================================================
-Message sender
-- "(sender)" to include the sender's name with spaces
-- "(@sender)" to include an at-mention of the sender
-
-Spam
-================================================================================
-@BotBot has several anti-spam features to stop spammy bots that it creates.
-- Bots may not interact with @BotBot.
-- Bots may not send the "!ping" command.
-- Bots may not !restore, !pause, or !kill other bots.
-- Bots that are triggered more than 10 times in 5 seconds are automatically
-  paused.
-
-Regexes
-================================================================================
-For those of you who don't know, "regex" stands for "regular expression", and is
-a way of doing pattern matching.
-You can find a good tutorial and reference at http://regular-expressions.info/.
+View the @BotBot wiki at https://github.com/ArkaneMoose/BotBot/wiki for a comprehensive guide on how to use @BotBot, including a guide on how to write @BotBot code and a list of features and restrictions that bots created with @BotBot have.
 
 Good luck!
 ================================================================================
