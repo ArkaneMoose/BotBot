@@ -1,4 +1,5 @@
 import os
+import errno
 import datetime
 import json
 
@@ -48,15 +49,25 @@ class Snapshot:
         except FileNotFoundError:
             return ["Snapshot file could not be opened."]
 
+        try:
+            os.unlink(os.path.join(snapshot_dir, "latest"))
+        except OSError as err:
+            if err.errno != errno.ENOENT:
+                raise
         os.symlink(filename, os.path.join(snapshot_dir, "latest"))
 
         return ['To load this snapshot later, type \"!load @BotBot ' + filename + '\".', 'Snapshot summary:\n' + '\n'.join(bot_names)]
 
-    def load(filename, bots):
+    def get_filepath(filename):
+        filepath = os.path.join(snapshot_dir, filename)
+        if not os.path.isfile(filepath): return None
+        filepath = os.path.realpath(filepath)
+        if os.path.dirname(filepath) != os.path.realpath(snapshot_dir): return None
+        return filepath
+
+    def load(filepath, bots):
         if not snapshot_dir:
             return ['Snapshots are not enabled.']
-
-        filepath = os.path.join(snapshot_dir, filename)
 
         try:
             with open(filepath, 'r') as f:

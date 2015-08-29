@@ -8,6 +8,8 @@ class EuphUtils:
         return re.compile(r'((?<=\s)|^)' + re.escape(EuphUtils.mention(nick)) + r'(\b|$|(?=\s))', re.IGNORECASE + re.MULTILINE)
 
     def command(name, nickname=None, match_string=None):
-        if not nickname:
+        if nickname == '':
+            return re.compile(name + r'\b\s*(?!@\S+)(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
+        elif not nickname:
             return re.compile(name + r'\b\s*(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
         return re.compile(name + r'\s+' + re.escape(EuphUtils.mention(nickname)) + r'(?:\b|$|(?=\s))\s*(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)

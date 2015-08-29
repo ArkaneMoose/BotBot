@@ -18,7 +18,7 @@ from snapshot import Snapshot
 log = logger.Logger()
 
 class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdRoom):
-    def __init__(self, room_name, password, nickname, help_text=""):
+    def __init__(self, room_name, password, nickname, help_text="", short_help_text=""):
         super().__init__(room_name, password)
 
         self.room_name = room_name.lower()
@@ -26,6 +26,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
         self.password = password
 
         self.help_text = help_text
+        self.short_help_text = short_help_text
 
         self.bots = BotCollection(self)
         self.botthread = threading.Thread(target=self.bots.run)
@@ -35,9 +36,15 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
 
         self.send_chat('Hello, world!')
         if Snapshot.is_enabled():
-            messages = Snapshot.load('latest', self.bots)
-            for message in messages:
-                self.send_chat(message)
+            filepath = Snapshot.get_filepath('latest')
+            if filepath:
+                messages = Snapshot.load(filepath, self.bots)
+                for message in messages:
+                    self.send_chat(message)
+            else:
+                self.send_chat('Could not find snapshot.')
+        else:
+            self.send_chat('Snapshots are not enabled.')
 
     def run(self):
         self.botthread.start()
@@ -51,7 +58,8 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             sender = message['sender']['name']
             msg_id = message['id']
             # !ping
-            if command.lower() == 'ping':
+            match = EuphUtils.command('ping', '').match(command)
+            if match:
                 self.send_chat('Pong!', msg_id)
                 return
             # !ping @BotBot
@@ -63,6 +71,11 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             match = EuphUtils.command('list', self.nickname).match(command)
             if match:
                 self.send_chat('Currently running bots created with ' + EuphUtils.mention(self.nickname) + ':\n' + self.bots.get_description(), msg_id)
+                return
+            # !help
+            match = EuphUtils.command('help', '').match(command)
+            if match:
+                self.send_chat(self.short_help_text, msg_id)
                 return
             # !help @BotBot
             match = EuphUtils.command('help', self.nickname).match(command)
@@ -110,6 +123,10 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             if match:
                 match = re.match(r'([^\s\\/]+\.json\b|latest)', match.group(1), re.IGNORECASE)
                 if match:
+                    filepath = Snapshot.get_filepath(match.group(0))
+                else:
+                    filepath = None
+                if filepath:
                     if not Snapshot.is_enabled():
                         self.send_chat('Snapshots are not enabled.', msg_id)
                         return
@@ -120,7 +137,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                     self.send_chat('Killing all bots...', msg_id)
                     self.bots.killall(False)
 
-                    messages = Snapshot.load(match.group(0), self.bots)
+                    messages = Snapshot.load(filepath, self.bots)
                     for message in messages:
                         self.send_chat(message, msg_id)
                 else:

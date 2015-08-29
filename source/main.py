@@ -14,8 +14,12 @@ help_text = ""
 with open("data/help.txt") as f:
     help_text = f.read()
 
+short_help_text = ""
+with open("data/shorthelp.txt") as f:
+    short_help_text = f.read()
+
 def main():
-    botbot = BotBot(room_name, password, nickname, help_text)
+    botbot = BotBot(room_name, password, nickname, help_text, short_help_text)
     eu.executable.start(botbot)
 
 if __name__ == '__main__':

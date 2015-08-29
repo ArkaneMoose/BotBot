@@ -28,8 +28,8 @@ class BotCollection(eu.execgroup.ExecGroup):
         return EuphUtils.mention(bot.nickname) + ' (created by "' + bot.creator + '")' + ('' if self.botbot and self.botbot.room_name == bot.room_name else (' (in &' + bot.room_name.lower() + ')')) + (' (paused)' if bot.paused else '')
 
     def killall(self, announce=True):
-        for bot in self.bots:
-            bot.kill(announce)
+        while len(self.bots) > 0:
+            self.bots[0].kill(announce)
 
     def remove(self, bot):
         try:
