@@ -28,7 +28,10 @@ Restart @BotBot.
 
 More Info
 ================================================================================
-View the @BotBot wiki at https://github.com/ArkaneMoose/BotBot/wiki for a comprehensive guide on how to use @BotBot, including a guide on how to write @BotBot code and a list of features and restrictions that bots created with @BotBot have.
+View the @BotBot wiki at https://github.com/ArkaneMoose/BotBot/wiki for a
+comprehensive guide on how to use @BotBot, including a guide on how to write
+@BotBot code and a list of features and restrictions that bots created with
+@BotBot have.
 
 Good luck!
 ================================================================================
