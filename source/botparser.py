@@ -16,7 +16,7 @@ class Parser:
                 if arrow_match:
                     i += len(arrow_match.group(0))
                     regex_mode = False
-                    self.array.append([re.compile(temp, re.IGNORECASE + re.UNICODE)])
+                    self.array.append([re.compile(temp, re.IGNORECASE)])
                     temp = ''
                 else:
                     temp += parse_string[i]
