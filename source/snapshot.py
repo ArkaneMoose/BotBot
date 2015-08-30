@@ -1,4 +1,5 @@
 import os
+import traceback
 import errno
 import datetime
 import json
@@ -6,10 +7,6 @@ import json
 from botbotbot import BotBotBot
 
 snapshot_dir = "snapshots"
-
-# This class does not work.
-# It needs to be updated to work with the new BotBot architecture.
-# It currently serves as a placeholder so that other code works.
 
 class Snapshot:
     def is_enabled():
@@ -30,7 +27,7 @@ class Snapshot:
                 else:
                     bot_names.append('@' + bot.nickname + ' (created by \"' + bot.creator + '\")')
             else:
-                if bot.room_name != room_name:
+                if bot.room_name != bots.botbot.room_name:
                     bot_names.append('@' + bot.nickname + ' (created by \"' + bot.creator + '\") (in &' + bot.room_name + ') (paused)')
                 else:
                     bot_names.append('@' + bot.nickname + ' (created by \"' + bot.creator + '\") (paused)')
@@ -53,8 +50,19 @@ class Snapshot:
             os.unlink(os.path.join(snapshot_dir, "latest"))
         except OSError as err:
             if err.errno != errno.ENOENT:
-                raise
-        os.symlink(filename, os.path.join(snapshot_dir, "latest"))
+                traceback.print_exc()
+                return ['To load this snapshot later, type \"!load @BotBot ' + filename + '\".', 'Snapshot summary:\n' + '\n'.join(bot_names), 'Note: \"latest\" file could not be written. \"!load @BotBot latest\" will not work as expected.']
+        except FileNotFoundError:
+            pass
+        except:
+            traceback.print_exc()
+            return ['To load this snapshot later, type \"!load @BotBot ' + filename + '\".', 'Snapshot summary:\n' + '\n'.join(bot_names), 'Note: \"latest\" file could not be written. \"!load @BotBot latest\" will not work as expected.']
+        
+        try:
+            os.symlink(filename, os.path.join(snapshot_dir, "latest"))
+        except:
+            traceback.print_exc()
+            return ['To load this snapshot later, type \"!load @BotBot ' + filename + '\".', 'Snapshot summary:\n' + '\n'.join(bot_names), 'Note: \"latest\" file could not be written. \"!load @BotBot latest\" will not work as expected.']
 
         return ['To load this snapshot later, type \"!load @BotBot ' + filename + '\".', 'Snapshot summary:\n' + '\n'.join(bot_names)]
 
