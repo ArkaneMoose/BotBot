@@ -44,3 +44,5 @@ Have fun, and please be respectful!
 
 @BotBot is open-source! Feel free to view the code, contribute, and report
 issues at https://github.com/ArkaneMoose/BotBot.
+
+@BotBot complies with the Euphorian bot standards.
