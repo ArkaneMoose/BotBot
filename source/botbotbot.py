@@ -54,6 +54,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
                 return
             self.send_chat('/me is now restored.', this_message)
             self.paused = False
+            self.start_time = time.time()
             self.pause_text = ''
         elif EuphUtils.command('!pause', self.nickname).match(content):
             if self.bots.is_bot(sender_agent_id):
