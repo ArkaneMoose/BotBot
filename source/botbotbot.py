@@ -26,6 +26,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
 
         # Bot state
         self.paused = False
+        self.start_time = time.time()
         self.last_times = []
 
         # Bot state info
@@ -68,10 +69,11 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
         elif self.paused and EuphUtils.command('!help', self.nickname).match(content):
             self.send_chat(self.pause_text, this_message)
             self.send_chat(self.generic_pause_text, this_message)
-        elif self.paused:
-            return
         else:
-            messages = self.code_struct.get_messages(content, sender)
+            if not self.paused:
+                messages = self.code_struct.get_messages(content, sender)
+            else:
+                messages = []
             if len(messages) > 0:
                 self.last_times.append(time.time())
                 while len(self.last_times) > spam_threshold_messages:
@@ -87,7 +89,17 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
                 while len(self.last_times) > spam_threshold_messages - 1:
                     del self.last_times[0]
                 for raw_message in messages:
-                    message = raw_message.replace('(sender)', sender).replace('(@sender)', EuphUtils.mention(sender)).replace('(room)', room_name)
+                    message = raw_message
+                    # This is probably how user variables will be implemented, too.
+                    variables = {
+                        'sender': sender,
+                        '@sender': EuphUtils.mention(sender),
+                        'room': room_name,
+                        'uptimeutc': EuphUtils.uptime_utc(self.start_time),
+                        'uptime': EuphUtils.uptime_dhms(self.start_time)
+                    }
+                    for i, j in variables.items():
+                        message = message.replace('(' + i + ')', j)
                     if EuphUtils.command('!ping', '').match(message):
                         continue
                     match = re.match(r'!to\s+@(\S+)(?:\s+&(\S+))?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
@@ -104,6 +116,11 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
                     self.send_chat('Pong!', this_message)
                 elif EuphUtils.command('help', self.nickname).match(content[1:]):
                     self.send_chat(self.help_text, this_message)
+                elif EuphUtils.command('uptime', self.nickname).match(content[1:]):
+                    if not self.paused:
+                        self.send_chat(EuphUtils.uptime_str(self.start_time), this_message)
+                    else:
+                        self.send_chat('/me is paused, so it currently has no uptime.', this_message)
 
     def kill(self, announce=True, msg_id=None):
         if announce:

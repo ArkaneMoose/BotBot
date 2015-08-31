@@ -3,6 +3,7 @@ import sys
 import threading
 
 import re
+import time
 import traceback
 
 #Additional modules
@@ -27,6 +28,8 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
 
         self.help_text = help_text
         self.short_help_text = short_help_text
+
+        self.start_time = time.time()
 
         self.bots = BotCollection(self)
         self.botthread = threading.Thread(target=self.bots.run)
@@ -66,6 +69,11 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             match = EuphUtils.command('ping', self.nickname).match(command)
             if match:
                 self.send_chat('Pong!', msg_id)
+                return
+            # !uptime @BotBot
+            match = EuphUtils.command('uptime', self.nickname).match(command)
+            if match:
+                self.send_chat(EuphUtils.uptime_str(self.start_time), msg_id)
                 return
             # !list @BotBot
             match = EuphUtils.command('list', self.nickname).match(command)
