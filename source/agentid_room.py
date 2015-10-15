@@ -10,11 +10,9 @@ class AgentIdRoom(room.Room):
     def __init__(self, roomname, password=None, attempts=None):
         super().__init__(roomname, password, attempts)
 
-        self.connection.add_callback(cn.PTYPE["REPLY"]["NICK"],
-                                            self.handle_nickreply)
+        self.connection.add_callback("nick-reply", self.handle_nickreply)
 
-        self.connection.add_callback(cn.PTYPE["REPLY"]["SEND"],
-                                            self.handle_sendreply)
+        self.connection.add_callback("send-reply", self.handle_sendreply)
 
         self.agent_id = None
 

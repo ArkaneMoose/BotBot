@@ -4,6 +4,7 @@ import threading
 
 import re
 import time
+import datetime
 import traceback
 
 #Additional modules
@@ -36,6 +37,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
 
     def ready(self):
         super().ready()
+        print('[' + str(datetime.datetime.utcnow()) + '] BotBot has started.')
 
         self.send_chat('Hello, world!')
         if Snapshot.is_enabled():
