@@ -80,7 +80,7 @@ class bot_thread(threading.Thread):
                 self.agent_id = data['data']['id']
             if data['type'] == 'send-event':
                 content = data['data']['content']
-                parent = data['data']['parent']
+                parent = data['data'].get('parent')
                 this_message = data['data']['id']
                 sender = data['data']['sender']['name']
                 send_time = data['data']['time']

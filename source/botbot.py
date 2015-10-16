@@ -76,6 +76,14 @@ def send_nick(nick=nickname):
     send(message)
     mid += 1
 
+def send_get_message(id):
+    global mid
+    global ws
+    message = {'type':'get-message','data':{'id':id},'id':str(mid)}
+    message = json.dumps(message)
+    send(message)
+    mid += 1
+
 def create_snapshot(this_message=None, sender='(System)'):
     if not snapshot_dir:
         send_message('Snapshots are not enabled for this instance of @' + nickname + '.', this_message)
@@ -257,15 +265,17 @@ while True:
         agent_id = data['data']['id']
         for bot in bots:
             bot.botbot_agent_id = agent_id
-    if data['type'] == 'send-event':
+    if data['type'] in ('send-event', 'get-message-reply'):
         content = data['data']['content']
-        parent = data['data']['parent']
+        parent = data['data'].get('parent')
         this_message = data['data']['id']
         sender = data['data']['sender']['name']
         sender_agent_id = data['data']['sender']['id']
         send_time = data['data']['time']
 
-        if len(content) > 0 and content[0] == '!':
+        if data['data'].get('truncated'):
+            send_get_message(data['data']['id'])
+        elif len(content) > 0 and content[0] == '!':
             if content[1:].lower() == 'ping':
                 send_message('Pong!', this_message)
                 log.write('Ponged to a ping from \"' + sender + '\".')
