@@ -1,0 +1,3 @@
+[submodule "lib/EuPy"]
+	path = lib/EuPy
+	url = https://github.com/jedevc/EuPy.git
