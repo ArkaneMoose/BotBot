@@ -46,3 +46,5 @@ Have fun, and please be respectful!
 issues at https://github.com/ArkaneMoose/BotBot.
 
 @BotBot complies with the Euphorian bot standards.
+
+Special thanks to niek for hosting and maintaining @BotBot.
