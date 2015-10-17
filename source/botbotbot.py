@@ -4,11 +4,12 @@ import euphoria as eu
 import time
 import re
 import agentid_room
+import longmessage_room
 
 spam_threshold_messages = 10
 spam_threshold_time = 5
 
-class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdRoom):
+class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdRoom, longmessage_room.LongMessageRoom):
     def __init__(self, room_name, password, nickname, creator, code_struct, bots):
         super().__init__(room_name, password)
 
@@ -34,6 +35,8 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
         self.generic_pause_text = 'To restore this bot, type "!restore ' + EuphUtils.mention(self.nickname) + '", or to kill this bot, type "!kill ' + EuphUtils.mention(self.nickname) + '".'
 
     def handle_chat(self, message):
+        if message.get('truncated'):
+            return
         if message['sender']['id'] == self.agent_id:
             return
         if self.bots.botbot and message['sender']['id'] == self.bots.botbot.agent_id:
