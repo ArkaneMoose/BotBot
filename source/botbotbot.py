@@ -23,7 +23,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.Agent
         self.room_name = room_name
         self.nickname = nickname
         self.creator = creator
-        self.help_text = EuphUtils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + ('using ' + EuphUtils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + EuphUtils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + EuphUtils.mention(self.nickname) + '".'
+        self.help_text = EuphUtils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + (' using ' + EuphUtils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + EuphUtils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + EuphUtils.mention(self.nickname) + '".'
 
         # Bot state
         self.paused = False
