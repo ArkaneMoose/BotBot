@@ -1,4 +1,6 @@
 import re
+import random
+from euphutils import EuphUtils
 
 class Parser:
     def __init__(self, parse_string):
@@ -7,7 +9,7 @@ class Parser:
         self.parse_string = parse_string
         regex_mode = True
         i = 0
-        while re.match(r'\s', parse_string[i]):
+        while i < len(parse_string) and re.match(r'\s', parse_string[i]):
             i += 1
         while i < len(parse_string):
             if regex_mode:
@@ -15,7 +17,10 @@ class Parser:
                 if arrow_match:
                     i += len(arrow_match.group(0))
                     regex_mode = False
-                    self.array.append([re.compile(temp, re.IGNORECASE + re.UNICODE)])
+                    if i >= len(parse_string):
+                        self.array.append([re.compile(temp, re.IGNORECASE), [0, '']])
+                    else:
+                        self.array.append([re.compile(temp, re.IGNORECASE)])
                     temp = ''
                 else:
                     temp += parse_string[i]
@@ -32,7 +37,7 @@ class Parser:
 
     def load_array(self, array):
         self.array = array
-
+    
     def get_messages(self, content, sender):
         messages = []
         for entry in self.array:
@@ -50,7 +55,7 @@ class Parser:
                     i += 1
                 messages.extend(messages_to_add)
                 continue
-            search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)')
+            search_string = content.replace(EuphUtils.mention(sender), '(@sender)')
             match = entry[0].search(search_string)
             if match:
                 messages_to_add = self.parse_entry(entry[1])
@@ -78,7 +83,7 @@ class Parser:
                     i += 1
                 messages.extend(messages_to_add)
                 continue
-            search_string = content.replace('@' + sender.replace(' ', ''), '(@sender)').replace(sender, '(sender)')
+            search_string = content.replace(EuphUtils.mention(sender), '(@sender)').replace(sender, '(sender)')
             match = entry[0].search(search_string)
             if match:
                 messages_to_add = self.parse_entry(entry[1])
@@ -134,11 +139,7 @@ class Parser:
                     result_strings += self.parse_entry(element)
         else:
             return []
-        try:
-            while True:
-                result_strings.remove('')
-        except ValueError:
-            return result_strings
+        return result_strings
 
     def parse_response_string(self, data, datatype=0):
         parsed = [datatype]
