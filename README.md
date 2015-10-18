@@ -22,7 +22,7 @@ To update @BotBot:
 
 ### Windows
 
-Run the following commands in MinGW or Cygwin:
+On Windows, these commands should run in MinGW or Cygwin.
 
 1. `pip3 install websocket-client`
 2. `git clone https://github.com/ArkaneMoose/BotBot.git`
