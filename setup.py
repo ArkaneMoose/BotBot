@@ -10,5 +10,5 @@ setup(
     packages=['botbot'],
     package_dir={'botbot': 'source'},
     install_requires=['eupy'],
-    dependency_links=['https://github.com/jedevc/EuPy.git']
+    dependency_links=['https://github.com/jedevc/EuPy.git#egg=eupy']
 )
