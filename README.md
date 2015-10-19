@@ -11,6 +11,10 @@ To install:
 To run:  
 `botbot`
 
+To configure @BotBot, create a `config.json` file containing your custom configuration. All settings are optional. Default configuration settings are in `defaults.json`.  
+To run with your custom configuration:
+`botbot /path/to/config.json`
+
 ## Help for @BotBot
 
 ### Usage
