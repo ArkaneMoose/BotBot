@@ -1,2 +1,0 @@
-@BotBot is a bot for Euphoria created by @myhandsaretypingwords that creates
-other bots. Type "!help @BotBot" to learn more.
