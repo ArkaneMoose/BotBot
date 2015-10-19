@@ -78,6 +78,8 @@ class Snapshot:
 
     @classmethod
     def get_filepath(cls, filename):
+        if not cls.is_enabled():
+            return None
         filepath = os.path.join(cls.snapshot_dir, filename)
         if not os.path.isfile(filepath): return None
         filepath = os.path.realpath(filepath)
@@ -86,7 +88,7 @@ class Snapshot:
 
     @classmethod
     def load(cls, filepath, bots):
-        if not cls.snapshot_dir:
+        if not cls.is_enabled():
             return ['Snapshots are not enabled.']
 
         try:
