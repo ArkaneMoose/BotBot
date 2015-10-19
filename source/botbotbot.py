@@ -1,10 +1,10 @@
-from euphutils import EuphUtils
+from botbot.euphutils import EuphUtils
+import botbot.agentid_room as agentid_room
+import botbot.longmessage_room as longmessage_room
 import euphoria as eu
 
 import time
 import re
-import agentid_room
-import longmessage_room
 
 spam_threshold_messages = 10
 spam_threshold_time = 5

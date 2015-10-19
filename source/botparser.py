@@ -1,6 +1,6 @@
 import re
 import random
-from euphutils import EuphUtils
+from botbot.euphutils import EuphUtils
 
 class Parser:
     def __init__(self, parse_string):
@@ -37,7 +37,7 @@ class Parser:
 
     def load_array(self, array):
         self.array = array
-    
+
     def get_messages(self, content, sender):
         messages = []
         for entry in self.array:
