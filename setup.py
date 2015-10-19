@@ -9,6 +9,11 @@ setup(
     license='MIT',
     packages=['botbot'],
     package_dir={'botbot': 'source'},
-    install_requires=['eupy'],
-    dependency_links=['https://github.com/jedevc/EuPy.git#egg=eupy']
+    install_requires=['eupy >=1.0, <2.0'],
+    dependency_links=['git+https://github.com/jedevc/EuPy.git@15ce6bbd4be61b2219fec2423366ce4751bec563#egg=eupy-1.0'],
+    entry_points={
+        'console_scripts': [
+            'botbot = botbot.__main__:main'
+        ]
+    }
 )
