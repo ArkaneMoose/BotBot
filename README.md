@@ -3,45 +3,13 @@ A bot for [Euphoria](https://euphoria.io/) created by @myhandsaretypingwords tha
 
 ## Installation
 
-@BotBot uses Python 3. Make sure that you have `python3` and `pip3` installed.
+@BotBot uses Python 3.
 
-### Linux
-1. `pip3 install websocket-client`
-2. `git clone https://github.com/ArkaneMoose/BotBot.git`
-3. `cd BotBot`
-4. `git submodule update --init`
+To install:  
+`python3 setup.py install`
 
-To run @BotBot:
-
-1. `./start_botbot.sh ROOMNAME` where `ROOMNAME` is the room at [Euphoria](https://euphoria.io/) where @BotBot will run.
-
-To update @BotBot:
-
-1. `git pull`
-2. `git submodule update`
-
-### Windows
-
-On Windows, these commands should run in MinGW or Cygwin.
-
-1. `pip3 install websocket-client`
-2. `git clone https://github.com/ArkaneMoose/BotBot.git`
-3. `cd BotBot`
-4. `git submodule update --init`
-5. `git update-index --assume-unchanged source/euphoria`
-6. `rm source/euphoria`
-7. `cp -r lib/EuPy/euphoria/ source/euphoria/`
-
-To run @BotBot:
-
-1. `./start_botbot.sh ROOMNAME` where `ROOMNAME` is the room at [Euphoria](https://euphoria.io/) where @BotBot will run.
-
-To update @BotBot:
-
-1. `git pull`
-2. `git submodule update`
-3. `rm -rf source/euphoria/`
-4. `cp -r lib/EuPy/euphoria/ source/euphoria/`
+To run:  
+`botbot`
 
 ## Help for @BotBot
 
