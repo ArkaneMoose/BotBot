@@ -1,6 +1,7 @@
 *__pycache__*
-/snapshots/
+/snapshots/*
 !/snapshots/snapshots.txt
 /*.egg-info/
 /build/
 /dist/
+config.json

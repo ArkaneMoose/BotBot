@@ -1,6 +1,7 @@
 import sys
 import re
 import json
+import argparse
 
 import euphoria as eu
 
@@ -12,7 +13,8 @@ room_name = 'testing'
 password = None
 nickname = 'BotBot'
 
-help_text = '''@BotBot is a bot for Euphoria created by @myhandsaretypingwords that creates
+help_text = '''\
+@BotBot is a bot for Euphoria created by @myhandsaretypingwords that creates
 other bots.
 
 Usage
@@ -59,26 +61,38 @@ Have fun, and please be respectful!
 @BotBot is open-source! Feel free to view the code, contribute, and report
 issues at https://github.com/ArkaneMoose/BotBot.
 
-@BotBot complies with the Euphorian bot standards.'''
+@BotBot complies with the Euphorian bot standards.\
+'''
 
-short_help_text = '''@BotBot is a bot for Euphoria created by @myhandsaretypingwords that creates
-other bots. Type "!help @BotBot" to learn more.'''
+short_help_text = '''\
+@BotBot is a bot for Euphoria created by @myhandsaretypingwords that creates
+other bots. Type "!help @BotBot" to learn more.\
+'''
 
 def main():
     botbot = BotBot(room_name, password, nickname, help_text, short_help_text)
     eu.executable.start(botbot)
 
+def get_args():
+    parser = argparse.ArgumentParser(prog='botbot', description='A meta-bot for Euphoria.', epilog='For details, read the README.md file at https://github.com/ArkaneMoose/BotBot/blob/master/README.md')
+    parser.add_argument('config-file', nargs='?', help='optional path to a JSON configuration file')
+    parser.add_argument('-r', '--room', help='room in Euphoria where @BotBot should reside')
+    parser.add_argument('-p', '--password', help='password for room if necessary')
+    parser.add_argument('-n', '--nickname', help='custom nickname for @BotBot')
+    parser.add_argument('-s', '--snapshot-dir', help='directory where snapshots will be read and written')
+    return parser.parse_args()
+
 if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        if len(sys.argv) > 2 or sys.argv[1].lower() == '--help':
-            print('Usage: python3 -m botbot <path to config.json>')
-            sys.exit(1)
-        with open(sys.argv[1]) as f:
+    args = vars(get_args())
+    if args.get('config-file'):
+        with open(args.get('config-file')) as f:
             config = json.load(f)
-        room_name = config.get('room', room_name)
-        password = config.get('password', password)
-        nickname = config.get('nickname', nickname)
-        help_text = config.get('helpText', help_text.replace('@BotBot', EuphUtils.mention(nickname)))
-        short_help_text = config.get('shortHelpText', short_help_text.replace('@BotBot', EuphUtils.mention(nickname)))
-        Snapshot.snapshot_dir = config.get('snapshotDirectory', Snapshot.snapshot_dir)
+    else:
+        config = {}
+    room_name = args['room'] or config.get('room', room_name)
+    password = args['password'] or config.get('password', password)
+    nickname = args['nickname'] or config.get('nickname', nickname)
+    help_text = config.get('helpText', help_text.replace('@BotBot', EuphUtils.mention(nickname)))
+    short_help_text = config.get('shortHelpText', short_help_text.replace('@BotBot', EuphUtils.mention(nickname)))
+    Snapshot.snapshot_dir = args['snapshot_dir'] or config.get('snapshotDirectory', Snapshot.snapshot_dir)
     main()

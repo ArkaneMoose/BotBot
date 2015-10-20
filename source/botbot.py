@@ -38,7 +38,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
 
     def ready(self):
         super().ready()
-        log.write('@' + self.nickname + ' has started.')
+        log.write(EuphUtils.mention(self.nickname) + ' has started.')
 
         self.send_chat('Hello, world!')
         if Snapshot.is_enabled():
