@@ -1,6 +1,6 @@
-from euphutils import EuphUtils
-from botparser import Parser
-from botbotbot import BotBotBot
+from botbot.euphutils import EuphUtils
+from botbot.botparser import Parser
+from botbot.botbotbot import BotBotBot
 
 import euphoria as eu
 import threading

@@ -4,16 +4,18 @@ import errno
 import datetime
 import json
 
-from botbotbot import BotBotBot
-
-snapshot_dir = "snapshots"
+from botbot.botbotbot import BotBotBot
 
 class Snapshot:
-    def is_enabled():
-        return bool(snapshot_dir)
+    snapshot_dir = ""
 
-    def create(bots):
-        if not Snapshot.is_enabled():
+    @classmethod
+    def is_enabled(cls):
+        return bool(cls.snapshot_dir)
+
+    @classmethod
+    def create(cls, bots):
+        if not cls.is_enabled():
             return ['Snapshots are not enabled.']
 
         #Pack all the bots together
@@ -35,9 +37,17 @@ class Snapshot:
         if len(packed_bots) == 0:
             return ['There are no running bots. A snapshot will not be created.']
 
+        # Create snapshot directory if it does not exist
+        try:
+            os.makedirs(cls.snapshot_dir)
+        except OSError as err:
+            if err.errno != errno.EEXIST or not os.path.isdir(cls.snapshot_dir):
+                traceback.print_exc()
+                return ["Snapshot directory could not be created."]
+
         formatted_datetime = datetime.datetime.now().strftime('%m-%d-%Y_%H%M%S')
         filename = formatted_datetime + '.json'
-        filepath = os.path.join(snapshot_dir, filename)
+        filepath = os.path.join(cls.snapshot_dir, filename)
 
         #Dump the bots to the file
         try:
@@ -47,7 +57,7 @@ class Snapshot:
             return ["Snapshot file could not be opened."]
 
         try:
-            os.unlink(os.path.join(snapshot_dir, "latest"))
+            os.unlink(os.path.join(cls.snapshot_dir, "latest"))
         except OSError as err:
             if err.errno != errno.ENOENT:
                 traceback.print_exc()
@@ -57,24 +67,28 @@ class Snapshot:
         except:
             traceback.print_exc()
             return ['To load this snapshot later, type \"!load @BotBot ' + filename + '\".', 'Snapshot summary:\n' + '\n'.join(bot_names), 'Note: \"latest\" file could not be written. \"!load @BotBot latest\" will not work as expected.']
-        
+
         try:
-            os.symlink(filename, os.path.join(snapshot_dir, "latest"))
+            os.symlink(filename, os.path.join(cls.snapshot_dir, "latest"))
         except:
             traceback.print_exc()
             return ['To load this snapshot later, type \"!load @BotBot ' + filename + '\".', 'Snapshot summary:\n' + '\n'.join(bot_names), 'Note: \"latest\" file could not be written. \"!load @BotBot latest\" will not work as expected.']
 
         return ['To load this snapshot later, type \"!load @BotBot ' + filename + '\".', 'Snapshot summary:\n' + '\n'.join(bot_names)]
 
-    def get_filepath(filename):
-        filepath = os.path.join(snapshot_dir, filename)
+    @classmethod
+    def get_filepath(cls, filename):
+        if not cls.is_enabled():
+            return None
+        filepath = os.path.join(cls.snapshot_dir, filename)
         if not os.path.isfile(filepath): return None
         filepath = os.path.realpath(filepath)
-        if os.path.dirname(filepath) != os.path.realpath(snapshot_dir): return None
+        if os.path.dirname(filepath) != os.path.realpath(cls.snapshot_dir): return None
         return filepath
 
-    def load(filepath, bots):
-        if not snapshot_dir:
+    @classmethod
+    def load(cls, filepath, bots):
+        if not cls.is_enabled():
             return ['Snapshots are not enabled.']
 
         try:

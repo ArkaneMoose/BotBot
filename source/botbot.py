@@ -9,14 +9,14 @@ import traceback
 
 #Additional modules
 import euphoria as eu
-from euphutils import EuphUtils
+from botbot.euphutils import EuphUtils
 
 #Project modules
-import logger
-import agentid_room
-import longmessage_room
-from botcollection import BotCollection
-from snapshot import Snapshot
+import botbot.logger as logger
+import botbot.agentid_room as agentid_room
+import botbot.longmessage_room as longmessage_room
+from botbot.botcollection import BotCollection
+from botbot.snapshot import Snapshot
 
 log = logger.Logger()
 
@@ -38,7 +38,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
 
     def ready(self):
         super().ready()
-        print('[' + str(datetime.datetime.utcnow()) + '] BotBot has started.')
+        log.write(EuphUtils.mention(self.nickname) + ' has started.')
 
         self.send_chat('Hello, world!')
         if Snapshot.is_enabled():

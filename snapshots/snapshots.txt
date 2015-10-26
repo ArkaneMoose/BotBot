@@ -1,1 +1,3 @@
-Snapshots will be placed in this folder.
+This folder is provided as a convenience.
+You may choose to place snapshots here.
+If you do, they will be ignored by git.
