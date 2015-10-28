@@ -45,7 +45,7 @@ class Snapshot:
                 traceback.print_exc()
                 return ["Snapshot directory could not be created."]
 
-        formatted_datetime = datetime.datetime.now().strftime('%m-%d-%Y_%H%M%S')
+        formatted_datetime = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
         filename = formatted_datetime + '.json'
         filepath = os.path.join(cls.snapshot_dir, filename)
 
