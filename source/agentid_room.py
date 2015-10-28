@@ -23,11 +23,7 @@ class AgentIdRoom(room.Room):
         Update agent ID if it has changed.
         """
 
-        try:
-            if data["data"] and data["data"]["id"]:
-                self.agent_id = data["data"]["id"]
-        except KeyError:
-            pass
+        self.agent_id = data.get('data', {}).get('id', self.agent_id)
 
     def handle_sendreply(self, data):
         """

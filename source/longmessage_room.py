@@ -23,7 +23,7 @@ class LongMessageRoom(room.Room):
         Checks if message is truncated; if so, issues a get-message command.
         """
 
-        if message["data"].get("truncated"):
+        if message.get("data", {}).get("truncated"):
             self.connection.send_packet("get-message",
                 cn.build_json(id=message["data"]["id"]))
 
