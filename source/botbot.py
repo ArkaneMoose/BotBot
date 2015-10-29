@@ -42,13 +42,9 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
 
         self.send_chat('Hello, world!')
         if Snapshot.is_enabled():
-            filepath = Snapshot.get_filepath('latest')
-            if filepath:
-                messages = Snapshot.load(filepath, self.bots)
-                for message in messages:
-                    self.send_chat(message)
-            else:
-                self.send_chat('Could not find snapshot.')
+            messages = Snapshot.load_current(self.bots)
+            for message in messages:
+                self.send_chat(message)
         else:
             self.send_chat('Snapshots are not enabled.')
 
@@ -168,15 +164,15 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             #!load
             match = EuphUtils.command('load', self.nickname).match(command)
             if match:
-                match = re.match(r'([^\s\\/]+\.json\b|latest)', match.group(1), re.IGNORECASE)
+                if not Snapshot.is_enabled():
+                    self.send_chat('Snapshots are not enabled.', msg_id)
+                    return
+                match = re.match(r'([^\s\\/]+\.tar\.gz\b|latest)', match.group(1), re.IGNORECASE)
                 if match:
                     filepath = Snapshot.get_filepath(match.group(0))
                 else:
                     filepath = None
                 if filepath:
-                    if not Snapshot.is_enabled():
-                        self.send_chat('Snapshots are not enabled.', msg_id)
-                        return
                     self.send_chat('A snapshot will be created so that the current state can be restored if necessary.', msg_id)
                     messages = Snapshot.create(self.bots)
                     for message in messages:
@@ -193,11 +189,8 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             #!restart
             match = EuphUtils.command('restart', self.nickname).match(command)
             if match:
-                messages = Snapshot.create(self.bots)
-                for message in messages:
-                    self.send_chat(message, msg_id)
                 self.send_chat('Killing all bots...', msg_id)
-                self.bots.killall(False)
+                self.bots.killall(announce=False, delete_file=False)
                 self.send_chat('/me is restarting...', msg_id)
                 self.quit()
 
