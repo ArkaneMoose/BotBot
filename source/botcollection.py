@@ -42,6 +42,20 @@ class BotCollection(eu.execgroup.ExecGroup):
         self.add(bot)
         return bot
 
+    def retrieve(self, nickname=None, mention_name=None, room_name=None):
+        # Ideally, this method should be accessible from the front-end, i.e.
+        # through the !list command in Euphoria.
+        matching_bots = []
+        for bot in self.bots:
+            if nickname and bot.nickname.lower() != nickname.lower():
+                continue
+            if mention_name and EuphUtils.mention(bot.nickname).lower() != EuphUtils.mention(mention_name).lower():
+                continue
+            if room_name and bot.room_name.lower() != room_name.lower():
+                continue
+            matching_bots.append(bot)
+        return matching_bots
+
     def interbot(self, nickname, target_room_name, message, sender, send_time, sender_agent_id, room_name):
         for bot in self.bots:
             if bot.nickname.lower() == nickname.lower() and (not target_room_name or bot.room_name.lower() == target_room_name.lower()):

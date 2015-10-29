@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='botbot',
-    version='0.1.0',
+    version='0.1.1',
     description='A meta-bot for Euphoria.',
     author='Rishov Sarkar',
     url='https://github.com/ArkaneMoose/BotBot',
