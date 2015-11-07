@@ -36,8 +36,9 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
         self.bots = BotCollection(self)
         self.botthread = threading.Thread(target=self.bots.run)
 
-    def ready(self):
-        super().ready()
+        self.initialized = False
+
+    def init(self):
         log.write(EuphUtils.mention(self.nickname) + ' has started.')
 
         self.send_chat('Hello, world!')
@@ -47,6 +48,12 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                 self.send_chat(message)
         else:
             self.send_chat('Snapshots are not enabled.')
+
+    def ready(self):
+        super().ready()
+        if not self.initialized:
+            self.initialized = True
+            self.init()
 
     def run(self):
         self.botthread.start()
