@@ -201,7 +201,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                 self.send_chat('/me is restarting...', msg_id)
                 self.quit()
 
-    def cleanup(self):
+    def quit(self):
+        super().quit()
         self.bots.quit()
-
         self.botthread.join()
