@@ -27,9 +27,9 @@ class BotCollection(eu.execgroup.ExecGroup):
             return '\n'.join(map(self.get_description, self.bots))
         return EuphUtils.mention(bot.nickname) + ' (created by "' + bot.creator + '")' + ('' if self.botbot and self.botbot.room_name == bot.room_name else (' (in &' + bot.room_name.lower() + ')')) + (' (paused)' if bot.paused else '')
 
-    def killall(self, announce=True):
+    def killall(self, announce=True, delete_file=True):
         while len(self.bots) > 0:
-            self.bots[0].kill(announce)
+            self.bots[0].kill(announce=announce, delete_file=delete_file)
 
     def remove(self, bot):
         try:
@@ -37,8 +37,12 @@ class BotCollection(eu.execgroup.ExecGroup):
         except ValueError:
             pass
 
-    def create(self, nickname, room_name, password, creator, code):
-        bot = BotBotBot(room_name, password, nickname, creator, Parser(code), self)
+    def create(self, nickname, room_name, password, creator, code, paused=False, pause_text='', uuid=None):
+        if uuid:
+            for bot in self.bots:
+                if bot.uuid == uuid:
+                    raise ValueError('bot with specified UUID already exists')
+        bot = BotBotBot(room_name, password, nickname, creator, Parser(code), self, paused=paused, pause_text=pause_text, uuid=uuid)
         self.add(bot)
         return bot
 
