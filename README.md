@@ -131,6 +131,9 @@ Message sender
 For those of you who don't know, "regex" stands for "regular expression", and is a way of doing pattern matching.  
 You can find a good tutorial and reference [here](http://regular-expressions.info/).
 
+### More info
+View the [@BotBot wiki](https://github.com/ArkaneMoose/BotBot/wiki) for a comprehensive guide on how to use @BotBot, including a guide on how to write @BotBot code and a list of features and restrictions that bots created with @BotBot have.
+
 ### Good luck!
 Good luck on your journey to becoming a bot programmer.
 
@@ -139,3 +142,5 @@ There is always an instance of @BotBot up in [&bots](https://euphoria.io/room/bo
 If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot-related questions.
 
 Have fun, and please be respectful!
+
+@BotBot complies with the [Euphorian bot standards](https://github.com/jedevc/botrulez/blob/master/README.md).
