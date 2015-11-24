@@ -24,8 +24,7 @@ class LongMessageRoom(room.Room):
         """
 
         if message["data"].get("truncated"):
-            self.connection.send_packet("get-message",
-                cn.build_json(id=message["data"]["id"]))
+            self.connection.send_packet("get-message", dict(id=message["data"]["id"]))
 
     def handle_getmessagereply(self, message):
         """

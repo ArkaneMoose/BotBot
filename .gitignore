@@ -4,5 +4,6 @@
 /*.egg-info/
 /build/
 /dist/
+/env/
 config.json
 BotBot.log
