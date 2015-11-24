@@ -1,0 +1,5 @@
+-e .
+-e git+https://github.com/jedevc/EuPy.git@7b48c35e96a1775ee37c4e5da8d3de46e99e609c#egg=eupy-1.0
+six==1.10.0
+websocket-client==0.34.0
+wheel==0.24.0
