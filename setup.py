@@ -17,5 +17,6 @@ setup(
         'console_scripts': [
             'botbot = botbot.__main__:main'
         ]
-    }
+    },
+    test_suite='tests'
 )

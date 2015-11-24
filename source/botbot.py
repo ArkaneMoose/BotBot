@@ -164,6 +164,9 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             #!save
             match = EuphUtils.command('save', self.nickname).match(command)
             if match:
+                if not Snapshot.is_enabled():
+                    self.send_chat('Snapshots are not enabled.', msg_id)
+                    return
                 messages = Snapshot.create(self.bots)
                 for message in messages:
                     self.send_chat(message, msg_id)
