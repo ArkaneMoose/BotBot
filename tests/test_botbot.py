@@ -1,14 +1,17 @@
 import unittest
-import unittest.mock
 import botbot.botbot
 import tests.sample_data as sample_data
 import random
+try:
+    import unittest.mock as mock
+except ImportError:
+    import mock
 
 class TestBotBot(unittest.TestCase):
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botbot.Snapshot')
-    @unittest.mock.patch('botbot.botbot.log')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botbot.Snapshot')
+    @mock.patch('botbot.botbot.log')
     def test_snapshot_checks(self, mock_class_1, mock_class_2, mock_class_3):
         """BotBot must not call Snapshot.load_current, Snapshot.load, or Snapshot.create if Snapshot.is_enabled() returns False."""
         mock_class_2.is_enabled.return_value = False
@@ -23,9 +26,9 @@ class TestBotBot(unittest.TestCase):
         mock_class_2.load.assert_not_called()
         mock_class_2.create.assert_not_called()
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botbot.Snapshot')
-    @unittest.mock.patch('botbot.botbot.log')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botbot.Snapshot')
+    @mock.patch('botbot.botbot.log')
     def test_load_once(self, mock_class_1, mock_class_2, mock_class_3):
         """BotBot must call Snapshot.load_current exactly once per run."""
         mock_class_2.is_enabled.return_value = True
@@ -34,14 +37,14 @@ class TestBotBot(unittest.TestCase):
         instance.ready()
         instance.cleanup()
         instance.ready()
-        mock_class_2.load_current.assert_called_once_with(unittest.mock.ANY)
+        mock_class_2.load_current.assert_called_once_with(mock.ANY)
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_ignore_messages(self, mock_class_1, mock_class_2):
         """BotBot must ignore truncated messages, messages that are from its own bots, and messages that are not commands."""
         instance = botbot.botbot.BotBot('testing', None, 'BotBot')
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         mock_class_1.return_value.is_bot.return_value = False
         message = sample_data.Message(content='!ping', truncated=True)
         instance.handle_chat(message)
@@ -55,12 +58,12 @@ class TestBotBot(unittest.TestCase):
         instance.handle_chat(message)
         instance.send_chat.assert_not_called()
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_ping(self, mock_class_1, mock_class_2):
         """BotBot must respond to general and specific pings, but not to specific pings intended for another bot."""
         instance = botbot.botbot.BotBot('testing', None, 'BotBot Test')
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!ping', truncated=None)
@@ -74,63 +77,63 @@ class TestBotBot(unittest.TestCase):
         instance.handle_chat(message)
         instance.send_chat.assert_not_called()
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_uptime(self, mock_class_1, mock_class_2):
         """BotBot must respond to the specific !uptime command."""
         instance = botbot.botbot.BotBot('testing', None, 'BotBot Test')
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!uptime @BotBotTest', truncated=None)
         instance.handle_chat(message)
         self.assertTrue(instance.send_chat.called)
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_list(self, mock_class_1, mock_class_2):
         """BotBot must respond to the specific !list command."""
         instance = botbot.botbot.BotBot('testing', None, 'BotBot Test')
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!list @BotBotTest', truncated=None)
         instance.handle_chat(message)
         self.assertTrue(instance.send_chat.called)
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_list(self, mock_class_1, mock_class_2):
         """BotBot must respond to the specific !list command."""
         instance = botbot.botbot.BotBot('testing', None, 'BotBot Test')
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!list @BotBotTest', truncated=None)
         instance.handle_chat(message)
         self.assertTrue(instance.send_chat.called)
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_short_help(self, mock_class_1, mock_class_2):
         """BotBot must respond to the general !help command when short_help_text is provided."""
         short_help_text = sample_data.string(length=random.randint(1, 255))
         instance = botbot.botbot.BotBot('testing', None, 'BotBot', short_help_text=short_help_text)
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!help', truncated=None)
         instance.handle_chat(message)
         self.assertTrue(instance.send_chat.called)
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_help(self, mock_class_1, mock_class_2):
         """BotBot must respond to the specific !help command when help_text is provided, but not to specific !help commands intended for other bots."""
         short_help_text = sample_data.string(length=random.randint(1, 255))
         help_text = sample_data.string(length=random.randint(1, 255))
         instance = botbot.botbot.BotBot('testing', None, 'BotBot Test', short_help_text=short_help_text, help_text=help_text)
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!help @BotBotTest', truncated=None)
@@ -141,25 +144,25 @@ class TestBotBot(unittest.TestCase):
         instance.handle_chat(message)
         instance.send_chat.assert_not_called()
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_killall(self, mock_class_1, mock_class_2):
         """BotBot must kill all bots when the specific !killall command is issued."""
         instance = botbot.botbot.BotBot('testing', None, 'BotBot Test')
-        instance.send_chat = unittest.mock.MagicMock()
-        instance.bots.killall = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
+        instance.bots.killall = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!killall @BotBotTest', truncated=None)
         instance.handle_chat(message)
         self.assertTrue(instance.bots.killall.called)
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_createbot(self, mock_class_1, mock_class_2):
         """BotBot must correctly create a bot when the !createbot command is issued and fail gracefully if the bot's code is invalid."""
         instance = botbot.botbot.BotBot('testing', 'password', 'BotBot')
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!createbot &test @TestBot code', truncated=None)
@@ -180,13 +183,13 @@ class TestBotBot(unittest.TestCase):
         except:
             self.fail('Exception not caught when creating a bot with an error.')
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_sendbot_onebot(self, mock_class_1, mock_class_2):
         """BotBot must correctly send a bot when the !sendbot command is issued when only one specified bot exists."""
         instance = botbot.botbot.BotBot('testing', 'password', 'BotBot')
-        instance.send_chat = unittest.mock.MagicMock()
-        matching_bot = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
+        matching_bot = mock.MagicMock()
         matching_bot.nickname = 'TestBot'
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
@@ -218,20 +221,20 @@ class TestBotBot(unittest.TestCase):
         except:
             self.fail('Exception not caught when !sendbot is issued with identifier that is out of range.')
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_sendbot_multibot(self, mock_class_1, mock_class_2):
         """BotBot must correctly send a bot when the !sendbot command is issued when more than one specified bot exists."""
         instance = botbot.botbot.BotBot('testing', 'password', 'BotBot')
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         instance.bots.get_description.return_value = ''
-        matching_bot_1 = unittest.mock.MagicMock()
+        matching_bot_1 = mock.MagicMock()
         matching_bot_1.nickname = 'TestBot'
-        matching_bot_2 = unittest.mock.MagicMock()
+        matching_bot_2 = mock.MagicMock()
         matching_bot_2.nickname = 'TestBot'
-        instance.bots.retrieve = unittest.mock.MagicMock(return_value=[matching_bot_1, matching_bot_2])
+        instance.bots.retrieve = mock.MagicMock(return_value=[matching_bot_1, matching_bot_2])
         mock_class_2.return_value.is_bot.return_value = False
         message = sample_data.Message(content='!sendbot &test @TestBot', truncated=None)
         instance.handle_chat(message)
@@ -244,12 +247,12 @@ class TestBotBot(unittest.TestCase):
         instance.bots.retrieve.assert_called_with(mention_name='TestBot')
         instance.bots.create.assert_called_once_with(matching_bot_2.nickname, 'test', None, matching_bot_2.creator, matching_bot_2.code_struct.parse_string)
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_sendbot_nobots(self, mock_class_1, mock_class_2):
         """BotBot must correctly send a bot when the !sendbot command is issued when no specified bot exists."""
         instance = botbot.botbot.BotBot('testing', 'password', 'BotBot')
-        instance.send_chat = unittest.mock.MagicMock()
+        instance.send_chat = mock.MagicMock()
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
         instance.bots.get_description.return_value = ''
@@ -260,9 +263,9 @@ class TestBotBot(unittest.TestCase):
         instance.bots.retrieve.assert_called_with(mention_name='TestBot')
         instance.bots.create.assert_not_called()
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botbot.Snapshot')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botbot.Snapshot')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_save(self, mock_class_1, mock_class_2, mock_class_3):
         """BotBot must call Snapshot.create when the specific !save command is issued."""
         mock_class_2.is_enabled.return_value = True
@@ -273,9 +276,9 @@ class TestBotBot(unittest.TestCase):
         instance.handle_chat(message)
         mock_class_2.create.assert_called_once_with(instance.bots)
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botbot.Snapshot')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botbot.Snapshot')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_load(self, mock_class_1, mock_class_2, mock_class_3):
         """BotBot must call Snapshot.load when the specific !load command is issued and refuse to do so if the filename is invalid."""
         mock_class_2.is_enabled.return_value = True
@@ -297,15 +300,15 @@ class TestBotBot(unittest.TestCase):
         instance.handle_chat(message)
         mock_class_2.load.assert_not_called()
 
-    @unittest.mock.patch('euphoria.connection.Connection')
-    @unittest.mock.patch('botbot.botbot.Snapshot')
-    @unittest.mock.patch('botbot.botcollection.BotCollection')
+    @mock.patch('euphoria.connection.Connection')
+    @mock.patch('botbot.botbot.Snapshot')
+    @mock.patch('botbot.botcollection.BotCollection')
     def test_restart(self, mock_class_1, mock_class_2, mock_class_3):
         """BotBot must call self.quit when the specific !restart command is issued."""
         instance = botbot.botbot.BotBot('testing', None, 'BotBot')
         instance.bots = mock_class_1()
         instance.bots.is_bot.return_value = False
-        instance.quit = unittest.mock.MagicMock()
+        instance.quit = mock.MagicMock()
         message = sample_data.Message(content='!restart @BotBot latest', truncated=None)
         instance.handle_chat(message)
         instance.quit.assert_called_once_with()
