@@ -10,7 +10,6 @@ setup(
     url='https://github.com/ArkaneMoose/BotBot',
     license='MIT',
     packages=['botbot'],
-    package_dir={'botbot': 'source'},
     install_requires=['eupy >=1.0, <2.0'],
     dependency_links=['git+https://github.com/jedevc/EuPy.git@7b48c35e96a1775ee37c4e5da8d3de46e99e609c#egg=eupy-1.0'],
     entry_points={
