@@ -1,4 +1,7 @@
 # @BotBot
+
+[![Build Status](https://travis-ci.org/ArkaneMoose/BotBot.svg?branch=tests)](https://travis-ci.org/ArkaneMoose/BotBot)
+
 A bot for [Euphoria](https://euphoria.io/) created by @myhandsaretypingwords that creates other bots.
 
 ## Installation
