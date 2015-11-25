@@ -45,15 +45,16 @@ class TestBotBot(unittest.TestCase):
         """BotBot must ignore truncated messages, messages that are from its own bots, and messages that are not commands."""
         instance = botbot.botbot.BotBot('testing', None, 'BotBot')
         instance.send_chat = mock.MagicMock()
-        mock_class_1.return_value.is_bot.return_value = False
+        instance.bots = mock_class_1()
+        instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='!ping', truncated=True)
         instance.handle_chat(message)
         instance.send_chat.assert_not_called()
-        mock_class_1.return_value.is_bot.return_value = True
+        instance.bots.is_bot.return_value = True
         message = sample_data.Message(content='!ping', truncated=None)
         instance.handle_chat(message)
         instance.send_chat.assert_not_called()
-        mock_class_1.return_value.is_bot.return_value = False
+        instance.bots.is_bot.return_value = False
         message = sample_data.Message(content='ping', truncated=None)
         instance.handle_chat(message)
         instance.send_chat.assert_not_called()
