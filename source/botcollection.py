@@ -60,7 +60,7 @@ class BotCollection(eu.execgroup.ExecGroup):
             matching_bots.append(bot)
         return matching_bots
 
-    def interbot(self, nickname, target_room_name, message, sender, send_time, sender_agent_id, room_name):
+    def interbot(self, mention_name, target_room_name, message, sender, send_time, sender_agent_id, room_name):
         for bot in self.bots:
-            if bot.nickname.lower() == nickname.lower() and (not target_room_name or bot.room_name.lower() == target_room_name.lower()):
+            if EuphUtils.mention(bot.nickname).lower() == EuphUtils.mention(mention_name).lower() and (not target_room_name or bot.room_name.lower() == target_room_name.lower()):
                 bot.recv_message(message, None, None, sender, sender_agent_id, send_time, room_name)
