@@ -71,7 +71,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         else:
             self.recv_message(message['content'], None, message['id'], message['sender']['name'], message['sender']['id'], message['time'], self.room_name)
 
-    def pause(pause_text=None, set_pause_text=True, reply_to=None):
+    def pause(self, pause_text=None, set_pause_text=True, reply_to=None):
         changed = False
         if not self.paused:
             self.paused = True
@@ -88,7 +88,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         self.send_chat(pause_text, reply_to)
         self.send_chat(self.generic_pause_text, reply_to)
 
-    def restore(reply_to=None):
+    def restore(self, reply_to=None):
         changed = False
         if self.paused:
             self.paused = False
@@ -157,6 +157,9 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                     if match:
                         self.change_nick(match.group(1))
                         continue
+                    match = re.match(r'!break\b', message, re.IGNORECASE + re.DOTALL)
+                    if match:
+                        break
                     if len(message) == 0:
                         continue
                     self.send_chat(message, this_message)
