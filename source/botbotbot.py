@@ -30,7 +30,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         self.password = password
         self.nickname = nickname
         self.creator = creator
-        self.help_text = EuphUtils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + (' using ' + EuphUtils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + EuphUtils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + EuphUtils.mention(self.nickname) + '".'
+        self.help_text = EuphUtils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + (' using ' + EuphUtils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + EuphUtils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + EuphUtils.mention(self.nickname) + '".\nThis bot has UUID ' + self.uuid + '.'
 
         # Bot state
         self.paused = paused
@@ -146,7 +146,8 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                         '@sender': EuphUtils.mention(sender),
                         'room': room_name,
                         'uptimeutc': EuphUtils.uptime_utc(self.start_time),
-                        'uptime': EuphUtils.uptime_dhms(self.start_time)
+                        'uptime': EuphUtils.uptime_dhms(self.start_time),
+                        'uuid': self.uuid
                     }
                     for i, j in variables.items():
                         message = message.replace('(' + i + ')', j)
