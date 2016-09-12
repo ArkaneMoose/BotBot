@@ -5,6 +5,10 @@ import datetime
 import json
 import shutil
 
+import botbot.logger as logger
+
+log = logger.Logger()
+
 class Snapshot:
     snapshot_dir = ""
 
@@ -150,6 +154,7 @@ class Snapshot:
                         uuid=packed_bot.get('uuid', None)
                     )
                 except:
+                    log.write('Failed to load ' + packed_bot_filename + ' from snapshot.')
                     traceback.print_exc()
                     failed_bots += 1
         except OSError:
