@@ -121,7 +121,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             self.pause(reply_to=this_message)
         elif content == "!antighost":
             #just reset the nick to the same thing it already is
-            self.change_nick(nickname)
+            self.change_nick(self.nickname)
         else:
             if not self.paused:
                 messages = self.code_struct.get_messages(content, sender)
