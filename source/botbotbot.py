@@ -119,7 +119,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                 self.pause(pause_text='/me has been paused by "' + sender + '".', reply_to=this_message)
         elif self.paused and EuphUtils.command('!help', self.nickname).match(content):
             self.pause(reply_to=this_message)
-        elif content == "!antighost":
+        elif content == '!antighost':
             #just reset the nick to the same thing it already is
             self.change_nick(self.nickname)
         else:
