@@ -144,6 +144,8 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                     variables = {
                         'sender': sender,
                         '@sender': EuphUtils.mention(sender),
+                        'self': self.nickname,
+                        '@self': EuphUtils.mention(self.nickname),
                         'room': room_name,
                         'uptimeutc': EuphUtils.uptime_utc(self.start_time),
                         'uptime': EuphUtils.uptime_dhms(self.start_time),
