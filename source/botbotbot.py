@@ -161,6 +161,10 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                     if match:
                         self.change_nick(match.group(1))
                         continue
+                    match = re.match(r'!inline\s+(.*)', message, re.IGNORECASE + re.DOTALL)
+                    if match:
+                        self.send_chat(match.group(1), parent)
+                        continue
                     match = re.match(r'!break\b', message, re.IGNORECASE + re.DOTALL)
                     if match:
                         break
