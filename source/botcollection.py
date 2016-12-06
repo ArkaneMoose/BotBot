@@ -27,6 +27,9 @@ class BotCollection(eu.execgroup.ExecGroup):
             return '\n'.join(map(self.get_description, self.bots))
         return EuphUtils.mention(bot.nickname) + ' (created by "' + bot.creator + '")' + ('' if self.botbot and self.botbot.room_name == bot.room_name else (' (in &' + bot.room_name.lower() + ')')) + (' (paused)' if bot.paused else '')
 
+    def get_numberofrunningbots(self):
+        return str(len(self.bots))
+   
     def killall(self, announce=True, delete_file=True):
         while len(self.bots) > 0:
             self.bots[0].kill(announce=announce, delete_file=delete_file)
