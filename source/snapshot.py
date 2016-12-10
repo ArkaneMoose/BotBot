@@ -4,6 +4,7 @@ import errno
 import datetime
 import json
 import shutil
+import time
 
 import botbot.logger as logger
 
@@ -157,6 +158,9 @@ class Snapshot:
                     log.write('Failed to load ' + packed_bot_filename + ' from snapshot.')
                     traceback.print_exc()
                     failed_bots += 1
+                #sleep for 1 second to stagger bot loads
+                #this should alleviate some server burden
+                time.sleep(1)
         except OSError:
             return ['Could not read bots from unpacked snapshot.']
 
