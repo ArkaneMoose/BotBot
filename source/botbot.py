@@ -86,7 +86,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             # !list @BotBot
             match = EuphUtils.command('list', self.nickname).match(command)
             if match:
-                self.send_chat('Currently running bots created with ' + EuphUtils.mention(self.nickname) + ':\n' + self.bots.get_description(), msg_id)
+                self.send_chat('Currently running bots created with ' + EuphUtils.mention(self.nickname) + ' (' + self.bots.get_numberofrunningbots() + '):\n' + self.bots.get_description(), msg_id)
                 return
             # !help
             match = EuphUtils.command('help', '').match(command)
