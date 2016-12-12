@@ -12,7 +12,7 @@ setup(
     packages=['botbot'],
     package_dir={'botbot': 'source'},
     install_requires=['eupy >=1.0, <2.0'],
-    dependency_links=['git+https://github.com/ArkaneMoose/EuPy.git@5addd782f22068d92cedc17c3d48c47c37884522#egg=eupy-1.0'],
+    dependency_links=['git+https://github.com/ArkaneMoose/EuPy.git@a569c35ea76a40b241a57669054b3247c3b4f960#egg=eupy-1.1'],
     entry_points={
         'console_scripts': [
             'botbot = botbot.__main__:main'
