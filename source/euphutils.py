@@ -13,7 +13,7 @@ class EuphUtils:
     @classmethod
     def command(cls, name, nickname=None, match_string=None):
         if nickname == '':
-            return re.compile(name + r'\b\s*(?!@\S+)(\S.*|$)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
+            return re.compile(name + r'\b\s*$', re.IGNORECASE + re.DOTALL + re.MULTILINE)
         elif not nickname:
             return re.compile(name + r'\b\s*(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
         return re.compile(name + r'\s+' + re.escape(cls.mention(nickname)) + r'(?:\b|$|(?=\s))\s*(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
