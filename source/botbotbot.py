@@ -123,8 +123,18 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             #just reset the nick to the same thing it already is
             self.change_nick(self.nickname)
         else:
+            variables = {
+                'sender': sender,
+                '@sender': EuphUtils.mention(sender),
+                'self': self.nickname,
+                '@self': EuphUtils.mention(self.nickname),
+                'room': room_name,
+                'uptimeutc': EuphUtils.uptime_utc(self.start_time),
+                'uptime': EuphUtils.uptime_dhms(self.start_time),
+                'uuid': self.uuid
+            }
             if not self.paused:
-                messages = self.code_struct.get_messages(content, sender)
+                messages = self.code_struct.get_messages(content, sender, variables)
             else:
                 messages = []
             if len(messages) > 0:
@@ -140,17 +150,6 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                     del self.last_times[0]
                 for raw_message in messages:
                     message = raw_message
-                    # This is probably how user variables will be implemented, too.
-                    variables = {
-                        'sender': sender,
-                        '@sender': EuphUtils.mention(sender),
-                        'self': self.nickname,
-                        '@self': EuphUtils.mention(self.nickname),
-                        'room': room_name,
-                        'uptimeutc': EuphUtils.uptime_utc(self.start_time),
-                        'uptime': EuphUtils.uptime_dhms(self.start_time),
-                        'uuid': self.uuid
-                    }
                     for i, j in variables.items():
                         message = message.replace('(' + i + ')', j)
                     if EuphUtils.command('!ping', '').match(message):
