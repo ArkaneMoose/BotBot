@@ -14,7 +14,7 @@ spam_threshold_messages = 10
 spam_threshold_time = 5
 
 class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickRoom, agentid_room.AgentIdRoom, longmessage_room.LongMessageRoom):
-    def __init__(self, room_name, password, nickname, creator, code_struct, bots, paused=False, pause_text='', uuid=None):
+    def __init__(self, room_name, password, nickname, creator, code_struct, bots, paused=False, pause_text='', uuid=None, variables={}):
         super().__init__(room_name, password)
 
         self.bots = bots
@@ -36,6 +36,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         self.paused = paused
         self.start_time = time.time()
         self.last_times = []
+        self.variables = variables
 
         # Bot state info
         self.pause_text = pause_text
@@ -101,6 +102,11 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         if changed:
             self.write_to_file()
 
+    def set_variable(self, name, value):
+        if name not in self.variables or self.variables[name] != value:
+            self.variables[name] = value
+            self.write_to_file()
+
     def recv_message(self, content='', parent=None, this_message=None, sender='', sender_agent_id='', send_time=0, room_name=''):
         if EuphUtils.command('!kill', self.nickname).match(content):
             if self.bots.is_bot(sender_agent_id):
@@ -123,7 +129,8 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             #just reset the nick to the same thing it already is
             self.change_nick(self.nickname)
         else:
-            variables = {
+            variables = dict(self.variables)
+            default_variables = {
                 'sender': sender,
                 '@sender': EuphUtils.mention(sender),
                 'self': self.nickname,
@@ -133,6 +140,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                 'uptime': EuphUtils.uptime_dhms(self.start_time),
                 'uuid': self.uuid
             }
+            variables.update(default_variables)
             if not self.paused:
                 messages = self.code_struct.get_messages(content, sender, variables)
             else:
@@ -161,6 +169,13 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                     match = re.match(r'!nick\s+(.*)', message, re.IGNORECASE + re.DOTALL)
                     if match:
                         self.change_nick(match.group(1))
+                        continue
+                    match = re.match(r'!var\s+(\S+)(?:\s+=)?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
+                    if match:
+                        name = match.group(1)
+                        value = match.group(2)
+                        if name not in default_variables:
+                            self.set_variable(name, value)
                         continue
                     match = re.match(r'!inline\s+(.*)', message, re.IGNORECASE + re.DOTALL)
                     if match:

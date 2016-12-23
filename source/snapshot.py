@@ -27,7 +27,8 @@ class Snapshot:
             'creator': bot.creator,
             'paused': bot.paused,
             'pauseText': bot.pause_text,
-            'uuid': bot.uuid
+            'uuid': bot.uuid,
+            'variables': bot.variables
         })
 
     @classmethod
@@ -152,7 +153,8 @@ class Snapshot:
                         packed_bot['code'],
                         paused=packed_bot.get('paused', False),
                         pause_text=packed_bot.get('pauseText', ''),
-                        uuid=packed_bot.get('uuid', None)
+                        uuid=packed_bot.get('uuid', None),
+                        variables=packed_bot.get('variables', {})
                     )
                 except:
                     log.write('Failed to load ' + packed_bot_filename + ' from snapshot.')
