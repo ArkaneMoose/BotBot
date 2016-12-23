@@ -7,6 +7,7 @@ class Parser:
         temp = ''
         self.array = []
         self.parse_string = parse_string
+        self.variables = {}
         regex_mode = True
         i = 0
         while i < len(parse_string) and re.match(r'\s', parse_string[i]):
@@ -38,8 +39,7 @@ class Parser:
     def load_array(self, array):
         self.array = array
 
-    def get_messages(self, content, sender, variables):
-        messages = []
+    def get_messages(self, content, sender):
         for entry in self.array:
             raw_regex_string = entry[0]
             regex_string = ''
@@ -50,7 +50,7 @@ class Parser:
                     # parse the variable name as if it was part of a response
                     parsed = self.parse_response_string(raw_regex_string[i:], 3)
                     i += len(parsed[1])
-                    variable = next(iter(self.parse_entry(parsed[0], variables)), '')
+                    variable = next(self.parse_entry(parsed[0]), '')
                     regex_string += re.escape(variable)
                 else:
                     regex_string += raw_regex_string[i]
@@ -58,62 +58,60 @@ class Parser:
             regex = re.compile(regex_string, re.IGNORECASE)
             match = regex.search(content)
             if match:
-                messages_to_add = self.parse_entry(entry[1], variables)
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
-                    i += 1
-                messages.extend(messages_to_add)
-                continue
-        return messages
+                messages = self.parse_entry(entry[1])
+                groups = list(reversed(match.groups('')))
+                groups = zip(map('\\{0}'.format, range(len(groups), 0, -1)), groups)
+                for message in messages:
+                    for backreference, group in groups:
+                        message = message.replace(backreference, group)
+                    yield message
 
     def get_regexes(self):
         return list(map(lambda entry: entry[0], self.array))
 
-    def parse_entry(self, parsed_data, variables):
-        result_strings = []
-        i = 0
+    def parse_entry(self, parsed_data):
         if parsed_data[0] == 0: # concatenation
-            result_strings = ['']
-            for element in parsed_data[1:]:
-                if type(element) is str:
-                    i = 0
-                    while i < len(result_strings):
-                        result_strings[i] += element
-                        i += 1
-                else:
-                    subresults = self.parse_entry(element, variables)
-                    if len(subresults) == 0:
-                        subresults.append('')
-                    old_result_strings = result_strings
-                    result_strings = []
-                    for result_string in old_result_strings:
-                        for subresult in subresults:
-                            result_strings.append(result_string + subresult)
+            if len(parsed_data) == 1:
+                return
+            element = parsed_data[1]
+            remainder = parsed_data[2:]
+            remainder.insert(0, 0)
+            if type(element) is str:
+                result = None
+                for result in self.parse_entry(remainder):
+                    yield element + result
+                if result is None:
+                    yield element
+            else:
+                element_result = None
+                for element_result in self.parse_entry(element):
+                    remainder_result = None
+                    for remainder_result in self.parse_entry(remainder):
+                        yield element_result + remainder_result
+                    if remainder_result is None:
+                        yield element_result
+                if element_result is None:
+                    for remainder_result in self.parse_entry(remainder):
+                        yield remainder_result
         elif parsed_data[0] == 1: # random choice [a,b,c]
             element = parsed_data[random.randint(1, len(parsed_data) - 1)]
             if type(element) is not str:
-                result_strings = self.parse_entry(element, variables)
+                for result in self.parse_entry(element):
+                    yield result
             else:
-                result_strings = [element]
+                yield element
         elif parsed_data[0] == 2: # multiple response {a,b,c}
             for element in parsed_data[1:]:
                 if type(element) is str:
-                    result_strings.append(element)
+                    yield element
                 else:
-                    result_strings += self.parse_entry(element, variables)
+                    for result in self.parse_entry(element):
+                        yield result
         elif parsed_data[0] == 3: # dynamic variable ${variable}
             variable_name = parsed_data[1]
             if type(variable_name) is not str:
-                variable_name = next(iter(self.parse_entry(variable_name, variables)), '')
-            result_strings = [variables.get(variable_name.strip(), '')]
-        else:
-            return []
-        return result_strings
+                variable_name = next(self.parse_entry(variable_name), '')
+            yield self.variables.get(variable_name.strip(), '')
 
     def parse_response_string(self, data, datatype=0):
         parsed = [datatype]

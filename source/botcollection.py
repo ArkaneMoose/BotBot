@@ -40,7 +40,7 @@ class BotCollection(eu.execgroup.ExecGroup):
         except ValueError:
             pass
 
-    def create(self, nickname, room_name, password, creator, code, paused=False, pause_text='', uuid=None, variables={}):
+    def create(self, nickname, room_name, password, creator, code, paused=False, pause_text='', uuid=None, variables=None):
         if uuid:
             for bot in self.bots:
                 if bot.uuid == uuid:

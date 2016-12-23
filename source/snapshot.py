@@ -154,7 +154,7 @@ class Snapshot:
                         paused=packed_bot.get('paused', False),
                         pause_text=packed_bot.get('pauseText', ''),
                         uuid=packed_bot.get('uuid', None),
-                        variables=packed_bot.get('variables', {})
+                        variables=packed_bot.get('variables', None)
                     )
                 except:
                     log.write('Failed to load ' + packed_bot_filename + ' from snapshot.')
