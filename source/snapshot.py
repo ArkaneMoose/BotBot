@@ -19,6 +19,9 @@ class Snapshot:
 
     @classmethod
     def pack_bot(cls, bot):
+        variables = dict(bot.variables)
+        if 'variables' in variables:
+            del variables['variables']
         return json.dumps({
             'nickname': bot.nickname,
             'code': bot.code_struct.parse_string,
@@ -28,7 +31,7 @@ class Snapshot:
             'paused': bot.paused,
             'pauseText': bot.pause_text,
             'uuid': bot.uuid,
-            'variables': bot.variables
+            'variables': variables
         })
 
     @classmethod

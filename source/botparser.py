@@ -1,6 +1,19 @@
 import re
 import random
+import sys
+import traceback
+import ast
+import operator
+import time
+import json
+from simpleeval import SimpleEval, DEFAULT_OPERATORS, DEFAULT_FUNCTIONS, DEFAULT_NAMES
 from botbot.euphutils import EuphUtils
+
+# functions and operators that can be used in ${math} syntax
+EVAL_FUNCTIONS = DEFAULT_FUNCTIONS.copy()
+EVAL_FUNCTIONS.update({'bool': bool, 'repr': repr, 'to_json': lambda x: json.dumps(x), 'from_json': lambda x: json.loads(x), 'len': len, 'mention': EuphUtils.mention, 'time': time.time, 'eval': None})
+EVAL_OPERATORS = DEFAULT_OPERATORS.copy()
+EVAL_OPERATORS.update({ast.Not: operator.not_, ast.In: lambda a, b: a in b, ast.NotIn: lambda a, b: a not in b, ast.Is: operator.is_, ast.IsNot: operator.is_not})
 
 class Parser:
     def __init__(self, parse_string):
@@ -59,8 +72,10 @@ class Parser:
             match = regex.search(content)
             if match:
                 messages = self.parse_entry(entry[1])
-                groups = list(reversed(match.groups('')))
-                groups = zip(map('\\{0}'.format, range(len(groups), 0, -1)), groups)
+                self.variables['groups'] = list(match.groups())
+                self.variables['groups'].insert(0, match.group(0))
+                groups = tuple(reversed(match.groups('')))
+                groups = tuple(zip(map('\\{0}'.format, range(len(groups), 0, -1)), groups))
                 for message in messages:
                     for backreference, group in groups:
                         message = message.replace(backreference, group)
@@ -111,7 +126,15 @@ class Parser:
             variable_name = parsed_data[1]
             if type(variable_name) is not str:
                 variable_name = next(self.parse_entry(variable_name), '')
-            yield self.variables.get(variable_name.strip(), '')
+            evaluator = SimpleEval(names=self.variables.copy(), functions=EVAL_FUNCTIONS, operators=EVAL_OPERATORS)
+            evaluator.names['variables'] = evaluator.names
+            evaluator.functions['eval'] = evaluator.eval
+            try:
+                yield str(evaluator.eval(variable_name))
+            except GeneratorExit:
+                pass
+            except:
+                yield '[Error: {0}]'.format(''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])).strip())
 
     def parse_response_string(self, data, datatype=0):
         parsed = [datatype]
@@ -129,6 +152,7 @@ class Parser:
         i = 0
         separate = True
         separatable = {0: False, 1: True, 2: True, 3: False}[datatype]
+        allow_nesting = {0: True, 1: True, 2: True, 3: False}[datatype]
         while i < len(data):
             if separate and re.match(r'\s', data[i]):
                 i += 1
@@ -137,7 +161,7 @@ class Parser:
                 if separate:
                     parsed.append('')
                 return (parsed, data[:i + 1])
-            elif data[i:].startswith(startchars):
+            elif allow_nesting and data[i:].startswith(startchars):
                 startchar = next(char for char in startchars if data[i:].startswith(char))
                 expression_type = start[startchar]
                 i += len(startchar)

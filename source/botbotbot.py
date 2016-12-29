@@ -108,6 +108,20 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             self.variables[name] = value
             self.write_to_file()
 
+    def del_variable(self, name):
+        if name in self.variables:
+            del self.variables[name]
+            self.write_to_file()
+
+    def reset_variables(self, keep={}):
+        changed = False
+        for key in list(self.variables.keys()):
+            if key not in keep:
+                del self.variables[key]
+                changed = True
+        if changed:
+            self.write_to_file()
+
     def recv_message(self, content='', parent=None, this_message=None, sender='', sender_agent_id='', send_time=0, room_name=''):
         if EuphUtils.command('!kill', self.nickname).match(content):
             if self.bots.is_bot(sender_agent_id):
@@ -133,12 +147,16 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             default_variables = {
                 'sender': sender,
                 '@sender': EuphUtils.mention(sender),
+                'atsender': EuphUtils.mention(sender),
                 'self': self.nickname,
                 '@self': EuphUtils.mention(self.nickname),
+                'atself': EuphUtils.mention(self.nickname),
                 'room': room_name,
                 'uptimeutc': EuphUtils.uptime_utc(self.start_time),
                 'uptime': EuphUtils.uptime_dhms(self.start_time),
-                'uuid': self.uuid
+                'uuid': self.uuid,
+                'variables': None,
+                'groups': None
             }
             self.variables.update(default_variables)
             if not self.paused:
@@ -159,7 +177,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                 while len(self.last_times) > spam_threshold_messages - 1:
                     self.last_times.remove(min(self.last_times))
                 for i, j in self.variables.items():
-                    message = message.replace('(' + i + ')', j)
+                    message = message.replace('(' + i + ')', str(j))
                 if EuphUtils.command('!ping', '').match(message):
                     continue
                 match = re.match(r'!to\s+@(\S+)(?:\s+&(\S+))?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
@@ -184,6 +202,16 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                     value = match.group(2)
                     if name not in default_variables:
                         self.set_variable(name, value)
+                    continue
+                match = re.match(r'!delvar\s+(\S+)', message, re.IGNORECASE + re.DOTALL)
+                if match:
+                    name = match.group(1)
+                    if name not in default_variables:
+                        self.del_variable(name)
+                    continue
+                match = re.match(r'!resetvars\b', message, re.IGNORECASE + re.DOTALL)
+                if match:
+                    self.reset_variables(keep=default_variables)
                     continue
                 match = re.match(r'!inline\s+(.*)', message, re.IGNORECASE + re.DOTALL)
                 if match:
