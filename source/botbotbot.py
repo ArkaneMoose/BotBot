@@ -180,6 +180,8 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                     self.send_chat('Pong!', this_message)
                 elif EuphUtils.command('help', self.nickname).match(content[1:]):
                     self.send_chat(self.help_text, this_message)
+                elif EuphUtils.command('uuid', self.nickname).match(content[1:]):
+                    self.send_chat('This bot has UUID {0}.'.format(self.uuid), this_message)
                 elif EuphUtils.command('uptime', self.nickname).match(content[1:]):
                     if not self.paused:
                         self.send_chat(EuphUtils.uptime_str(self.start_time), this_message)
