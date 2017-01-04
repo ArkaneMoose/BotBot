@@ -1,12 +1,26 @@
 import re
 import random
+import sys
+import traceback
+import ast
+import operator
+import time
+import json
+from simpleeval import SimpleEval, DEFAULT_OPERATORS, DEFAULT_FUNCTIONS, DEFAULT_NAMES
 from botbot.euphutils import EuphUtils
+
+# functions and operators that can be used in ${math} syntax
+EVAL_FUNCTIONS = DEFAULT_FUNCTIONS.copy()
+EVAL_FUNCTIONS.update({'bool': bool, 'repr': repr, 'to_json': lambda x: json.dumps(x), 'from_json': lambda x: json.loads(x), 'len': len, 'mention': EuphUtils.mention, 'time': time.time, 'eval': None})
+EVAL_OPERATORS = DEFAULT_OPERATORS.copy()
+EVAL_OPERATORS.update({ast.Not: operator.not_, ast.In: lambda a, b: a in b, ast.NotIn: lambda a, b: a not in b, ast.Is: operator.is_, ast.IsNot: operator.is_not})
 
 class Parser:
     def __init__(self, parse_string):
         temp = ''
         self.array = []
         self.parse_string = parse_string
+        self.variables = {}
         regex_mode = True
         i = 0
         while i < len(parse_string) and re.match(r'\s', parse_string[i]):
@@ -18,9 +32,9 @@ class Parser:
                     i += len(arrow_match.group(0))
                     regex_mode = False
                     if i >= len(parse_string):
-                        self.array.append([re.compile(temp, re.IGNORECASE), [0, '']])
+                        self.array.append([temp, [0, '']])
                     else:
-                        self.array.append([re.compile(temp, re.IGNORECASE)])
+                        self.array.append([temp])
                     temp = ''
                 else:
                     temp += parse_string[i]
@@ -39,115 +53,106 @@ class Parser:
         self.array = array
 
     def get_messages(self, content, sender):
-        messages = []
         for entry in self.array:
-            search_string = content
-            match = entry[0].search(search_string)
-            if match:
-                messages_to_add = self.parse_entry(entry[1])
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
+            raw_regex_string = entry[0]
+            regex_string = ''
+            i = 0
+            while i < len(raw_regex_string):
+                if raw_regex_string[i:].startswith('${'):
+                    i += 2
+                    # parse the variable name as if it was part of a response
+                    parsed = self.parse_response_string(raw_regex_string[i:], 3)
+                    i += len(parsed[1])
+                    variable = next(self.parse_entry(parsed[0]), '')
+                    regex_string += re.escape(variable)
+                else:
+                    regex_string += raw_regex_string[i]
                     i += 1
-                messages.extend(messages_to_add)
-                continue
-            search_string = content.replace(EuphUtils.mention(sender), '(@sender)')
-            match = entry[0].search(search_string)
+            regex = re.compile(regex_string, re.IGNORECASE)
+            match = regex.search(content)
             if match:
-                messages_to_add = self.parse_entry(entry[1])
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
-                    i += 1
-                messages.extend(messages_to_add)
-                continue
-            search_string = content.replace(sender, '(sender)')
-            match = entry[0].search(search_string)
-            if match:
-                messages_to_add = self.parse_entry(entry[1])
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
-                    i += 1
-                messages.extend(messages_to_add)
-                continue
-            search_string = content.replace(EuphUtils.mention(sender), '(@sender)').replace(sender, '(sender)')
-            match = entry[0].search(search_string)
-            if match:
-                messages_to_add = self.parse_entry(entry[1])
-                groups = match.groups('')
-                i = 0
-                while i < len(messages_to_add):
-                    j = len(groups) - 1
-                    while j >= 0:
-                        messages_to_add[i] = messages_to_add[i].replace('\\' + str(j + 1), groups[j])
-                        j -= 1
-                    i += 1
-                messages.extend(messages_to_add)
-                continue
-        return messages
+                messages = self.parse_entry(entry[1])
+                self.variables['groups'] = list(match.groups())
+                self.variables['groups'].insert(0, match.group(0))
+                groups = tuple(reversed(match.groups('')))
+                groups = tuple(zip(map('\\{0}'.format, range(len(groups), 0, -1)), groups))
+                for message in messages:
+                    for backreference, group in groups:
+                        message = message.replace(backreference, group)
+                    yield message
 
     def get_regexes(self):
-        regexes = []
-        for entry in self.array:
-            regexes.append(entry[0].pattern)
-        return regexes
+        return list(map(lambda entry: entry[0], self.array))
 
     def parse_entry(self, parsed_data):
-        result_strings = []
-        i = 0
-        if parsed_data[0] == 0:
-            result_strings = ['']
-            for element in parsed_data[1:]:
-                if type(element) is str:
-                    i = 0
-                    while i < len(result_strings):
-                        result_strings[i] += element
-                        i += 1
-                else:
-                    subresults = self.parse_entry(element)
-                    if len(subresults) == 0:
-                        subresults.append('')
-                    old_result_strings = result_strings
-                    result_strings = []
-                    for result_string in old_result_strings:
-                        for subresult in subresults:
-                            result_strings.append(result_string + subresult)
-        elif parsed_data[0] == 1:
+        if parsed_data[0] == 0: # concatenation
+            if len(parsed_data) == 1:
+                return
+            element = parsed_data[1]
+            remainder = parsed_data[2:]
+            remainder.insert(0, 0)
+            if type(element) is str:
+                result = None
+                for result in self.parse_entry(remainder):
+                    yield element + result
+                if result is None:
+                    yield element
+            else:
+                element_result = None
+                for element_result in self.parse_entry(element):
+                    remainder_result = None
+                    for remainder_result in self.parse_entry(remainder):
+                        yield element_result + remainder_result
+                    if remainder_result is None:
+                        yield element_result
+                if element_result is None:
+                    for remainder_result in self.parse_entry(remainder):
+                        yield remainder_result
+        elif parsed_data[0] == 1: # random choice [a,b,c]
             element = parsed_data[random.randint(1, len(parsed_data) - 1)]
             if type(element) is not str:
-                result_strings = self.parse_entry(element)
+                for result in self.parse_entry(element):
+                    yield result
             else:
-                result_strings = [element]
-        elif parsed_data[0] == 2:
+                yield element
+        elif parsed_data[0] == 2: # multiple response {a,b,c}
             for element in parsed_data[1:]:
                 if type(element) is str:
-                    result_strings.append(element)
+                    yield element
                 else:
-                    result_strings += self.parse_entry(element)
-        else:
-            return []
-        return result_strings
+                    for result in self.parse_entry(element):
+                        yield result
+        elif parsed_data[0] == 3: # dynamic variable ${variable}
+            variable_name = parsed_data[1]
+            if type(variable_name) is not str:
+                variable_name = next(self.parse_entry(variable_name), '')
+            evaluator = SimpleEval(names=self.variables.copy(), functions=EVAL_FUNCTIONS, operators=EVAL_OPERATORS)
+            evaluator.names['variables'] = evaluator.names
+            evaluator.functions['eval'] = evaluator.eval
+            try:
+                yield str(evaluator.eval(variable_name))
+            except GeneratorExit:
+                pass
+            except:
+                yield '[Error: {0}]'.format(''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])).strip())
 
     def parse_response_string(self, data, datatype=0):
         parsed = [datatype]
-        startchars = {'[': 1, '{': 2}
-        endchars = {0: ';', 1: ']', 2: '}'}
-        endchar = endchars[datatype]
+
+        # possible expression types:
+        # 0 = concatenation
+        # 1 = random choice [a,b,c]
+        # 2 = multiple response {a,b,c}
+        # 3 = dynamic variable ${variable}
+        start = {'[': 1, '{': 2, '${': 3}
+        end = {0: ';', 1: ']', 2: '}', 3: '}'}
+
+        startchars = tuple(start.keys())
+        endchar = end[datatype]
         i = 0
         separate = True
+        separatable = {0: False, 1: True, 2: True, 3: False}[datatype]
+        allow_nesting = {0: True, 1: True, 2: True, 3: False}[datatype]
         while i < len(data):
             if separate and re.match(r'\s', data[i]):
                 i += 1
@@ -156,9 +161,12 @@ class Parser:
                 if separate:
                     parsed.append('')
                 return (parsed, data[:i + 1])
-            elif data[i] in startchars.keys():
-                subparsed = self.parse_response_string(data[i + 1:], startchars[data[i]])
-                i += len(subparsed[1]) + 1
+            elif allow_nesting and data[i:].startswith(startchars):
+                startchar = next(char for char in startchars if data[i:].startswith(char))
+                expression_type = start[startchar]
+                i += len(startchar)
+                subparsed = self.parse_response_string(data[i:], expression_type)
+                i += len(subparsed[1])
                 if separate or parsed[0] == 0:
                     parsed.append(subparsed[0])
                     separate = False
@@ -168,7 +176,7 @@ class Parser:
                     else:
                         parsed[-1] = [0, parsed[-1], subparsed[0]]
                 continue
-            elif data[i] == ',' and parsed[0] != 0:
+            elif separatable and data[i] == ',':
                 if separate:
                     parsed.append('')
                 separate = True

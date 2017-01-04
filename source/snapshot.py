@@ -19,6 +19,9 @@ class Snapshot:
 
     @classmethod
     def pack_bot(cls, bot):
+        variables = dict(bot.variables)
+        if 'variables' in variables:
+            del variables['variables']
         return json.dumps({
             'nickname': bot.nickname,
             'code': bot.code_struct.parse_string,
@@ -27,7 +30,8 @@ class Snapshot:
             'creator': bot.creator,
             'paused': bot.paused,
             'pauseText': bot.pause_text,
-            'uuid': bot.uuid
+            'uuid': bot.uuid,
+            'variables': variables
         })
 
     @classmethod
@@ -152,7 +156,8 @@ class Snapshot:
                         packed_bot['code'],
                         paused=packed_bot.get('paused', False),
                         pause_text=packed_bot.get('pauseText', ''),
-                        uuid=packed_bot.get('uuid', None)
+                        uuid=packed_bot.get('uuid', None),
+                        variables=packed_bot.get('variables', None)
                     )
                 except:
                     log.write('Failed to load ' + packed_bot_filename + ' from snapshot.')
