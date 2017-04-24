@@ -20,6 +20,8 @@ class Logger:
         if self.logging:
             l = '[' + datetime.datetime.now().strftime('%m/%d/%Y %H:%M:%S') + '] ' + message
             if self.file is None:
-                print(l)
+                sys.stderr.write(l + '\n')
+                sys.stderr.flush()
             else:
                 self.file.write(l + '\n')
+                self.file.flush()
