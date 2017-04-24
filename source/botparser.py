@@ -9,6 +9,10 @@ import json
 from simpleeval import SimpleEval, DEFAULT_OPERATORS, DEFAULT_FUNCTIONS, DEFAULT_NAMES
 from botbot.euphutils import EuphUtils
 
+import botbot.logger as logger
+
+log = logger.Logger()
+
 # functions and operators that can be used in ${math} syntax
 EVAL_FUNCTIONS = DEFAULT_FUNCTIONS.copy()
 EVAL_FUNCTIONS.update({'bool': bool, 'repr': repr, 'to_json': lambda x: json.dumps(x), 'from_json': lambda x: json.loads(x), 'len': len, 'mention': EuphUtils.mention, 'unwhitespace': lambda x: re.sub(r'\s', '_', x), 'time': time.time, 'eval': None})
@@ -68,7 +72,11 @@ class Parser:
                 else:
                     regex_string += raw_regex_string[i]
                     i += 1
-            regex = re.compile(regex_string, re.IGNORECASE)
+            try:
+                regex = re.compile(regex_string, re.IGNORECASE)
+            except re.error:
+                log.write('Invaid regular expression; ignoring: ' + repr(regex_string))
+                continue
             match = regex.search(content)
             if match:
                 messages = self.parse_entry(entry[1])
