@@ -75,8 +75,8 @@ class Parser:
                     i += 1
             try:
                 regex = re.compile(regex_string, re.IGNORECASE)
-            except re.error:
-                log.write('Invaid regular expression; ignoring: {!r} ({!s})'.format(regex_string, self.dbginfo))
+            except re.error as e:
+                log.write('Bad regular expression {!r} ({!s}), ignoring. ({!s})'.format(regex_string, e.message, self.dbginfo))
                 continue
             match = regex.search(content)
             if match:
