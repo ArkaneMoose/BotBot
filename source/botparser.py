@@ -20,10 +20,11 @@ EVAL_OPERATORS = DEFAULT_OPERATORS.copy()
 EVAL_OPERATORS.update({ast.Not: operator.not_, ast.In: lambda a, b: a in b, ast.NotIn: lambda a, b: a not in b, ast.Is: operator.is_, ast.IsNot: operator.is_not})
 
 class Parser:
-    def __init__(self, parse_string):
+    def __init__(self, parse_string, dbginfo=None):
         temp = ''
         self.array = []
         self.parse_string = parse_string
+        self.dbginfo = dbginfo or 'N/A'
         self.variables = {}
         regex_mode = True
         i = 0
@@ -75,7 +76,7 @@ class Parser:
             try:
                 regex = re.compile(regex_string, re.IGNORECASE)
             except re.error:
-                log.write('Invaid regular expression; ignoring: ' + repr(regex_string))
+                log.write('Invaid regular expression; ignoring: {!r} ({!s})'.format(regex_string, self.dbginfo))
                 continue
             match = regex.search(content)
             if match:

@@ -45,7 +45,7 @@ class BotCollection(eu.execgroup.ExecGroup):
             for bot in self.bots:
                 if bot.uuid == uuid:
                     raise ValueError('bot with specified UUID already exists')
-        bot = BotBotBot(room_name, password, nickname, creator, Parser(code), self, paused=paused, pause_text=pause_text, uuid=uuid, variables=variables)
+        bot = BotBotBot(room_name, password, nickname, creator, Parser(code, '{!r} in {!r} by {!r}, uuid {!s}'.format(nickname, room_name, creator, uuid or 'N/A')), self, paused=paused, pause_text=pause_text, uuid=uuid, variables=variables)
         self.add(bot)
         return bot
 
