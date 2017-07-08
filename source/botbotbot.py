@@ -218,7 +218,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                 match = re.match(r'!inline\s+(.*)', message, re.IGNORECASE + re.DOTALL)
                 if match:
                     if self.spam_check(current_time, this_message):
-                        self.send_chat(match.group(1), parent)
+                        self.send_chat(match.group(1), parent or this_message)
                     else: return
                     continue
                 match = re.match(r'!break\b', message, re.IGNORECASE + re.DOTALL)
