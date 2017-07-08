@@ -31,6 +31,7 @@ class Snapshot:
             'paused': bot.paused,
             'pauseText': bot.pause_text,
             'uuid': bot.uuid,
+            'initialized': bot.initialized,
             'variables': variables
         })
 
@@ -157,7 +158,8 @@ class Snapshot:
                         paused=packed_bot.get('paused', False),
                         pause_text=packed_bot.get('pauseText', ''),
                         uuid=packed_bot.get('uuid', None),
-                        variables=packed_bot.get('variables', None)
+                        variables=packed_bot.get('variables', None),
+                        initialized=packed_bot.get('initialized', False)
                     )
                 except:
                     log.write('Failed to load ' + packed_bot_filename + ' from snapshot.')

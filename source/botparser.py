@@ -19,6 +19,10 @@ EVAL_FUNCTIONS.update({'bool': bool, 'repr': repr, 'to_json': lambda x: json.dum
 EVAL_OPERATORS = DEFAULT_OPERATORS.copy()
 EVAL_OPERATORS.update({ast.Not: operator.not_, ast.In: lambda a, b: a in b, ast.NotIn: lambda a, b: a not in b, ast.Is: operator.is_, ast.IsNot: operator.is_not})
 
+# init pseudo-regex; i.e. if a bot has this as the regex string, its response
+# will be triggered on the bot's initialization
+INIT_TRIGGER = '(??init)'
+
 class Parser:
     def __init__(self, parse_string, dbginfo=None):
         temp = ''
@@ -57,9 +61,18 @@ class Parser:
     def load_array(self, array):
         self.array = array
 
+    def get_init_messages(self):
+        for raw_regex_string, response_data in self.array:
+            if raw_regex_string.lower() == INIT_TRIGGER:
+                messages = self.parse_entry(response_data)
+                # just in case someone is relying on groups[0] existing
+                self.variables['groups'] = ['']
+                yield from messages
+
     def get_messages(self, content, sender):
-        for entry in self.array:
-            raw_regex_string = entry[0]
+        for raw_regex_string, response_data in self.array:
+            if raw_regex_string.lower() == INIT_TRIGGER:
+                continue
             regex_string = ''
             i = 0
             while i < len(raw_regex_string):
@@ -80,7 +93,7 @@ class Parser:
                 continue
             match = regex.search(content)
             if match:
-                messages = self.parse_entry(entry[1])
+                messages = self.parse_entry(response_data)
                 self.variables['groups'] = list(match.groups())
                 self.variables['groups'].insert(0, match.group(0))
                 groups = tuple(reversed(match.groups('')))

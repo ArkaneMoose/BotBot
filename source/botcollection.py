@@ -40,12 +40,12 @@ class BotCollection(eu.execgroup.ExecGroup):
         except ValueError:
             pass
 
-    def create(self, nickname, room_name, password, creator, code, paused=False, pause_text='', uuid=None, variables=None):
+    def create(self, nickname, room_name, password, creator, code, paused=False, pause_text='', uuid=None, variables=None, initialized=False):
         if uuid:
             for bot in self.bots:
                 if bot.uuid == uuid:
                     raise ValueError('bot with specified UUID already exists')
-        bot = BotBotBot(room_name, password, nickname, creator, Parser(code, '{!r} in {!r} by {!r}, uuid {!s}'.format(nickname, room_name, creator, uuid or 'N/A')), self, paused=paused, pause_text=pause_text, uuid=uuid, variables=variables)
+        bot = BotBotBot(room_name, password, nickname, creator, Parser(code, '{!r} in {!r} by {!r}, uuid {!s}'.format(nickname, room_name, creator, uuid or 'N/A')), self, paused=paused, pause_text=pause_text, uuid=uuid, variables=variables, initialized=initialized)
         self.add(bot)
         return bot
 

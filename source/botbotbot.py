@@ -14,7 +14,7 @@ spam_threshold_messages = 10
 spam_threshold_time = 5
 
 class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickRoom, agentid_room.AgentIdRoom, longmessage_room.LongMessageRoom):
-    def __init__(self, room_name, password, nickname, creator, code_struct, bots, paused=False, pause_text='', uuid=None, variables=None):
+    def __init__(self, room_name, password, nickname, creator, code_struct, bots, paused=False, pause_text='', uuid=None, variables=None, initialized=False):
         super().__init__(room_name, password)
 
         self.bots = bots
@@ -38,12 +38,19 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         self.last_times = set()
         self.variables = variables or {}
         self.code_struct.variables = self.variables
+        self.initialized = initialized
 
         # Bot state info
         self.pause_text = pause_text
         self.generic_pause_text = 'To restore this bot, type "!restore ' + EuphUtils.mention(self.nickname) + '", or to kill this bot, type "!kill ' + EuphUtils.mention(self.nickname) + '".'
 
         self.write_to_file()
+
+    def ready(self):
+        super().ready()
+        if not self.initialized:
+            self.initialized = True
+            self.send_user_messages(init=True)
 
     def write_to_file(self):
         if Snapshot.is_enabled():
@@ -143,104 +150,111 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         elif EuphUtils.command('!antighost').match(content):
             #just reset the nick to the same thing it already is
             self.change_nick(self.nickname)
-        else:
-            default_variables = {
-                'sender': sender,
-                '@sender': EuphUtils.mention(sender),
-                'atsender': EuphUtils.mention(sender),
-                'self': self.nickname,
-                '@self': EuphUtils.mention(self.nickname),
-                'atself': EuphUtils.mention(self.nickname),
-                'creator': self.creator,
-                '@creator': EuphUtils.mention(self.creator),
-                'atcreator': EuphUtils.mention(self.creator),
-                'room': room_name,
-                'uptimeutc': EuphUtils.uptime_utc(self.start_time),
-                'uptime': EuphUtils.uptime_dhms(self.start_time),
-                'uuid': self.uuid,
-                'variables': None,
-                'groups': None
-            }
-            self.variables.update(default_variables)
-            if not self.paused:
-                messages = self.code_struct.get_messages(content, sender)
+        elif not self.send_user_messages(content, parent, this_message, sender, sender_agent_id, send_time, room_name) and content.startswith('!'):
+            if EuphUtils.command('ping', '').match(content[1:]):
+                self.send_chat('Pong!', this_message)
+            elif EuphUtils.command('ping', self.nickname).match(content[1:]):
+                self.send_chat('Pong!', this_message)
+            elif EuphUtils.command('help', self.nickname).match(content[1:]):
+                self.send_chat(self.help_text, this_message)
+            elif EuphUtils.command('uuid', self.nickname).match(content[1:]):
+                self.send_chat('This bot has UUID {0}.'.format(self.uuid), this_message)
+            elif EuphUtils.command('uptime', self.nickname).match(content[1:]):
+                if not self.paused:
+                    self.send_chat(EuphUtils.uptime_str(self.start_time), this_message)
+                else:
+                    self.send_chat('/me is paused, so it currently has no uptime.', this_message)
+
+    # implements only user-programmed messages and not BotBot built-in commands
+    # returns True if the user programmed a response for this message
+    def send_user_messages(self, content='', parent=None, this_message=None, sender='', sender_agent_id='', send_time=0, room_name='', init=False):
+        default_variables = {
+            'sender': sender,
+            '@sender': EuphUtils.mention(sender),
+            'atsender': EuphUtils.mention(sender),
+            'self': self.nickname,
+            '@self': EuphUtils.mention(self.nickname),
+            'atself': EuphUtils.mention(self.nickname),
+            'creator': self.creator,
+            '@creator': EuphUtils.mention(self.creator),
+            'atcreator': EuphUtils.mention(self.creator),
+            'room': room_name,
+            'uptimeutc': EuphUtils.uptime_utc(self.start_time),
+            'uptime': EuphUtils.uptime_dhms(self.start_time),
+            'uuid': self.uuid,
+            'variables': None,
+            'groups': None
+        }
+        self.variables.update(default_variables)
+        if not self.paused:
+            if init:
+                messages = self.code_struct.get_init_messages()
             else:
-                messages = []
-            current_time = time.time()
-            message = None
-            for message in messages:
-                for i, j in self.variables.items():
-                    message = message.replace('(' + i + ')', str(j))
-                if len(message) == 0:
-                    continue
-                if EuphUtils.command('!ping', '').match(message):
-                    continue
-                match = re.match(r'!to\s+@(\S+)(?:\s+&(\S+))?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
-                if match:
-                    if self.spam_check(current_time, this_message):
-                        self.bots.interbot(match.group(1), match.group(2).lower() if match.group(2) else None, match.group(3), sender, sender_agent_id, send_time, room_name)
-                    else: return
-                    continue
-                match = re.match(r'!nick\s+(.*)', message, re.IGNORECASE + re.DOTALL)
-                if match:
-                    new_nickname = match.group(1)
-                    # I run the spam check here to ensure that the bot isn't
-                    # spamming nick commands to the server.
-                    if self.spam_check(current_time, this_message):
-                        self.change_nick(new_nickname)
-                        self.variables.update({
-                            'self': new_nickname,
-                            '@self': EuphUtils.mention(new_nickname),
-                            }) # Questionable, since there's no guarantee that
-                               # the nick change succeeded, but in my opinion,
-                               # the case where the nick change fails is an edge
-                               # case, and this will behave as expected 99% of
-                               # the time.
-                    else: return
-                    continue
-                match = re.match(r'!var\s+(\S+)(?:\s+=)?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
-                if match:
-                    name = match.group(1)
-                    value = match.group(2)
-                    if name not in default_variables:
-                        self.set_variable(name, value)
-                    continue
-                match = re.match(r'!delvar\s+(\S+)', message, re.IGNORECASE + re.DOTALL)
-                if match:
-                    name = match.group(1)
-                    if name not in default_variables:
-                        self.del_variable(name)
-                    continue
-                match = re.match(r'!resetvars\b', message, re.IGNORECASE + re.DOTALL)
-                if match:
-                    self.reset_variables(keep=default_variables)
-                    continue
-                match = re.match(r'!inline\s+(.*)', message, re.IGNORECASE + re.DOTALL)
-                if match:
-                    if self.spam_check(current_time, this_message):
-                        self.send_chat(match.group(1), parent or this_message)
-                    else: return
-                    continue
-                match = re.match(r'!break\b', message, re.IGNORECASE + re.DOTALL)
-                if match:
-                    break
+                messages = self.code_struct.get_messages(content, sender)
+        else:
+            messages = []
+        current_time = time.time()
+        message = None
+        for message in messages:
+            for i, j in self.variables.items():
+                message = message.replace('(' + i + ')', str(j))
+            if len(message) == 0:
+                continue
+            if EuphUtils.command('!ping', '').match(message):
+                continue
+            match = re.match(r'!to\s+@(\S+)(?:\s+&(\S+))?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
+            if match:
                 if self.spam_check(current_time, this_message):
-                    self.send_chat(message, this_message)
-                else: return
-            if message is None and content.startswith('!'):
-                if EuphUtils.command('ping', '').match(content[1:]):
-                    self.send_chat('Pong!', this_message)
-                elif EuphUtils.command('ping', self.nickname).match(content[1:]):
-                    self.send_chat('Pong!', this_message)
-                elif EuphUtils.command('help', self.nickname).match(content[1:]):
-                    self.send_chat(self.help_text, this_message)
-                elif EuphUtils.command('uuid', self.nickname).match(content[1:]):
-                    self.send_chat('This bot has UUID {0}.'.format(self.uuid), this_message)
-                elif EuphUtils.command('uptime', self.nickname).match(content[1:]):
-                    if not self.paused:
-                        self.send_chat(EuphUtils.uptime_str(self.start_time), this_message)
-                    else:
-                        self.send_chat('/me is paused, so it currently has no uptime.', this_message)
+                    self.bots.interbot(match.group(1), match.group(2).lower() if match.group(2) else None, match.group(3), sender, sender_agent_id, send_time, room_name)
+                else: break
+                continue
+            match = re.match(r'!nick\s+(.*)', message, re.IGNORECASE + re.DOTALL)
+            if match:
+                new_nickname = match.group(1)
+                # I run the spam check here to ensure that the bot isn't
+                # spamming nick commands to the server.
+                if self.spam_check(current_time, this_message):
+                    self.change_nick(new_nickname)
+                    self.variables.update({
+                        'self': new_nickname,
+                        '@self': EuphUtils.mention(new_nickname),
+                        }) # Questionable, since there's no guarantee that
+                           # the nick change succeeded, but in my opinion,
+                           # the case where the nick change fails is an edge
+                           # case, and this will behave as expected 99% of
+                           # the time.
+                else: break
+                continue
+            match = re.match(r'!var\s+(\S+)(?:\s+=)?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
+            if match:
+                name = match.group(1)
+                value = match.group(2)
+                if name not in default_variables:
+                    self.set_variable(name, value)
+                continue
+            match = re.match(r'!delvar\s+(\S+)', message, re.IGNORECASE + re.DOTALL)
+            if match:
+                name = match.group(1)
+                if name not in default_variables:
+                    self.del_variable(name)
+                continue
+            match = re.match(r'!resetvars\b', message, re.IGNORECASE + re.DOTALL)
+            if match:
+                self.reset_variables(keep=default_variables)
+                continue
+            match = re.match(r'!inline\s+(.*)', message, re.IGNORECASE + re.DOTALL)
+            if match:
+                if self.spam_check(current_time, this_message):
+                    self.send_chat(match.group(1), parent or this_message)
+                else: break
+                continue
+            match = re.match(r'!break\b', message, re.IGNORECASE + re.DOTALL)
+            if match:
+                break
+            if self.spam_check(current_time, this_message):
+                self.send_chat(message, this_message)
+            else: break
+        return message is not None
 
     # Before a message is sent that could be possible spam, run spam_check().
     # Returns True if the message is okay to send, or False otherwise.
