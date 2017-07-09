@@ -21,7 +21,7 @@ EVAL_OPERATORS.update({ast.Not: operator.not_, ast.In: lambda a, b: a in b, ast.
 
 # init pseudo-regex; i.e. if a bot has this as the regex string, its response
 # will be triggered on the bot's initialization
-INIT_TRIGGER = '(??init)'
+INIT_TRIGGER = '(+init)'
 
 class Parser:
     def __init__(self, parse_string, dbginfo=None):
