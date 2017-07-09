@@ -51,6 +51,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         if not self.initialized:
             self.initialized = True
             self.send_user_messages(init=True)
+            self.write_to_file()
 
     def write_to_file(self):
         if Snapshot.is_enabled():
