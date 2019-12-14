@@ -135,6 +135,10 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             if self.bots.is_bot(sender_agent_id):
                 return
             self.kill(msg_id=this_message)
+        elif EuphUtils.command('!ukill', self.uuid).match(content):
+            if self.bots.is_bot(sender_agent_id):
+                return
+            self.kill(msg_id=this_message)
         elif self.paused and EuphUtils.command('!restore', self.nickname).match(content):
             if self.bots.is_bot(sender_agent_id):
                 return
