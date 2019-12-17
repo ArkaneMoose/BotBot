@@ -7,7 +7,7 @@ import operator
 import time
 import json
 from simpleeval import SimpleEval, DEFAULT_OPERATORS, DEFAULT_FUNCTIONS, DEFAULT_NAMES
-from .euphutils import EuphUtils
+from . import euphutils
 
 from . import logger
 
@@ -15,7 +15,7 @@ log = logger.Logger()
 
 # functions and operators that can be used in ${math} syntax
 EVAL_FUNCTIONS = DEFAULT_FUNCTIONS.copy()
-EVAL_FUNCTIONS.update({'bool': bool, 'repr': repr, 'to_json': lambda x: json.dumps(x), 'from_json': lambda x: json.loads(x), 'len': len, 'mention': EuphUtils.mention, 'unwhitespace': lambda x: re.sub(r'\s', '_', x), 'time': time.time, 'eval': None})
+EVAL_FUNCTIONS.update({'bool': bool, 'repr': repr, 'to_json': lambda x: json.dumps(x), 'from_json': lambda x: json.loads(x), 'len': len, 'mention': euphutils.mention, 'unwhitespace': lambda x: re.sub(r'\s', '_', x), 'time': time.time, 'eval': None})
 EVAL_OPERATORS = DEFAULT_OPERATORS.copy()
 EVAL_OPERATORS.update({ast.Not: operator.not_, ast.In: lambda a, b: a in b, ast.NotIn: lambda a, b: a not in b, ast.Is: operator.is_, ast.IsNot: operator.is_not})
 

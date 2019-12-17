@@ -1,5 +1,5 @@
-from .euphutils import EuphUtils
 from .snapshot import Snapshot
+from . import euphutils
 from . import agentid_room
 from . import longmessage_room
 import euphoria as eu
@@ -31,7 +31,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         self.password = password
         self.nickname = nickname
         self.creator = creator
-        self.help_text = EuphUtils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + (' using ' + EuphUtils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + EuphUtils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + EuphUtils.mention(self.nickname) + '".\nThis bot has UUID ' + self.uuid + '.'
+        self.help_text = euphutils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + (' using ' + euphutils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + euphutils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + euphutils.mention(self.nickname) + '".\nThis bot has UUID ' + self.uuid + '.'
 
         # Bot state
         self.paused = paused
@@ -43,7 +43,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
 
         # Bot state info
         self.pause_text = pause_text
-        self.generic_pause_text = 'To restore this bot, type "!restore ' + EuphUtils.mention(self.nickname) + '", or to kill this bot, type "!kill ' + EuphUtils.mention(self.nickname) + '".'
+        self.generic_pause_text = 'To restore this bot, type "!restore ' + euphutils.mention(self.nickname) + '", or to kill this bot, type "!kill ' + euphutils.mention(self.nickname) + '".'
 
         self.write_to_file()
 
@@ -132,42 +132,42 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             self.write_to_file()
 
     def recv_message(self, content='', parent=None, this_message=None, sender='', sender_agent_id='', send_time=0, room_name=''):
-        if EuphUtils.command('!kill', self.nickname).match(content):
+        if euphutils.command('!kill', self.nickname).match(content):
             if self.bots.is_bot(sender_agent_id):
                 return
             self.kill(msg_id=this_message)
-        elif EuphUtils.command('!ukill', self.uuid).match(content):
+        elif euphutils.command('!ukill', self.uuid).match(content):
             if self.bots.is_bot(sender_agent_id):
                 return
             self.kill(msg_id=this_message)
-        elif self.paused and EuphUtils.command('!restore', self.nickname).match(content):
+        elif self.paused and euphutils.command('!restore', self.nickname).match(content):
             if self.bots.is_bot(sender_agent_id):
                 return
             self.restore(this_message)
-        elif EuphUtils.command('!pause', self.nickname).match(content):
+        elif euphutils.command('!pause', self.nickname).match(content):
             if self.bots.is_bot(sender_agent_id):
                 return
             if self.paused:
                 self.pause(pause_text='/me is already paused.', set_pause_text=False, reply_to=this_message)
             else:
                 self.pause(pause_text='/me has been paused by "' + sender + '".', reply_to=this_message)
-        elif self.paused and EuphUtils.command('!help', self.nickname).match(content):
+        elif self.paused and euphutils.command('!help', self.nickname).match(content):
             self.pause(reply_to=this_message)
-        elif EuphUtils.command('!antighost').match(content):
+        elif euphutils.command('!antighost').match(content):
             #just reset the nick to the same thing it already is
             self.change_nick(self.nickname)
         elif not self.send_user_messages(content, parent, this_message, sender, sender_agent_id, send_time, room_name) and content.startswith('!'):
-            if EuphUtils.command('ping', '').match(content[1:]):
+            if euphutils.command('ping', '').match(content[1:]):
                 self.send_chat('Pong!', this_message)
-            elif EuphUtils.command('ping', self.nickname).match(content[1:]):
+            elif euphutils.command('ping', self.nickname).match(content[1:]):
                 self.send_chat('Pong!', this_message)
-            elif EuphUtils.command('help', self.nickname).match(content[1:]):
+            elif euphutils.command('help', self.nickname).match(content[1:]):
                 self.send_chat(self.help_text, this_message)
-            elif EuphUtils.command('uuid', self.nickname).match(content[1:]):
+            elif euphutils.command('uuid', self.nickname).match(content[1:]):
                 self.send_chat('This bot has UUID {0}.'.format(self.uuid), this_message)
-            elif EuphUtils.command('uptime', self.nickname).match(content[1:]):
+            elif euphutils.command('uptime', self.nickname).match(content[1:]):
                 if not self.paused:
-                    self.send_chat(EuphUtils.uptime_str(self.start_time), this_message)
+                    self.send_chat(euphutils.uptime_str(self.start_time), this_message)
                 else:
                     self.send_chat('/me is paused, so it currently has no uptime.', this_message)
 
@@ -176,17 +176,17 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
     def send_user_messages(self, content='', parent=None, this_message=None, sender='', sender_agent_id='', send_time=0, room_name='', init=False):
         default_variables = {
             'sender': sender,
-            '@sender': EuphUtils.mention(sender),
-            'atsender': EuphUtils.mention(sender),
+            '@sender': euphutils.mention(sender),
+            'atsender': euphutils.mention(sender),
             'self': self.nickname,
-            '@self': EuphUtils.mention(self.nickname),
-            'atself': EuphUtils.mention(self.nickname),
+            '@self': euphutils.mention(self.nickname),
+            'atself': euphutils.mention(self.nickname),
             'creator': self.creator,
-            '@creator': EuphUtils.mention(self.creator),
-            'atcreator': EuphUtils.mention(self.creator),
+            '@creator': euphutils.mention(self.creator),
+            'atcreator': euphutils.mention(self.creator),
             'room': room_name,
-            'uptimeutc': EuphUtils.uptime_utc(self.start_time),
-            'uptime': EuphUtils.uptime_dhms(self.start_time),
+            'uptimeutc': euphutils.uptime_utc(self.start_time),
+            'uptime': euphutils.uptime_dhms(self.start_time),
             'uuid': self.uuid,
             'variables': None,
             'groups': None
@@ -206,7 +206,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                 message = message.replace('(' + i + ')', str(j))
             if len(message) == 0:
                 continue
-            if EuphUtils.command('!ping', '').match(message):
+            if euphutils.command('!ping', '').match(message):
                 continue
             match = re.match(r'!to\s+@(\S+)(?:\s+&(\S+))?\s+(.*)', message, re.IGNORECASE + re.DOTALL)
             if match:
@@ -223,7 +223,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
                     self.change_nick(new_nickname)
                     self.variables.update({
                         'self': new_nickname,
-                        '@self': EuphUtils.mention(new_nickname),
+                        '@self': euphutils.mention(new_nickname),
                         }) # Questionable, since there's no guarantee that
                            # the nick change succeeded, but in my opinion,
                            # the case where the nick change fails is an edge

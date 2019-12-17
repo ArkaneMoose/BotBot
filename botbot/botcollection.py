@@ -1,4 +1,4 @@
-from .euphutils import EuphUtils
+from . import euphutils
 from .botparser import Parser
 from .botbotbot import BotBotBot
 
@@ -25,7 +25,7 @@ class BotCollection(eu.execgroup.ExecGroup):
             if len(self.bots) == 0:
                 return '(None)'
             return '\n'.join(map(self.get_description, self.bots))
-        return EuphUtils.mention(bot.nickname) + ' (created by "' + bot.creator + '")' + ('' if self.botbot and self.botbot.room_name == bot.room_name else (' (in &' + bot.room_name.lower() + ')')) + (' (paused)' if bot.paused else '')
+        return euphutils.mention(bot.nickname) + ' (created by "' + bot.creator + '")' + ('' if self.botbot and self.botbot.room_name == bot.room_name else (' (in &' + bot.room_name.lower() + ')')) + (' (paused)' if bot.paused else '')
 
     def get_numberofrunningbots(self):
         return str(len(self.bots))
@@ -56,7 +56,7 @@ class BotCollection(eu.execgroup.ExecGroup):
         for bot in self.bots:
             if nickname and bot.nickname.lower() != nickname.lower():
                 continue
-            if mention_name and EuphUtils.mention(bot.nickname).lower() != EuphUtils.mention(mention_name).lower():
+            if mention_name and euphutils.mention(bot.nickname).lower() != euphutils.mention(mention_name).lower():
                 continue
             if room_name and bot.room_name.lower() != room_name.lower():
                 continue
@@ -65,5 +65,5 @@ class BotCollection(eu.execgroup.ExecGroup):
 
     def interbot(self, mention_name, target_room_name, message, sender, send_time, sender_agent_id, room_name):
         for bot in self.bots:
-            if EuphUtils.mention(bot.nickname).lower() == EuphUtils.mention(mention_name).lower() and (not target_room_name or bot.room_name.lower() == target_room_name.lower()):
+            if euphutils.mention(bot.nickname).lower() == euphutils.mention(mention_name).lower() and (not target_room_name or bot.room_name.lower() == target_room_name.lower()):
                 bot.recv_message(message, None, None, sender, sender_agent_id, send_time, room_name)
