@@ -31,7 +31,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         self.password = password
         self.nickname = nickname
         self.creator = creator
-        self.help_text = euphutils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + (' using ' + euphutils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + euphutils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + euphutils.mention(self.nickname) + '".\nThis bot has UUID ' + self.uuid + '.'
+        self.help_text = euphutils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + (' using ' + euphutils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + euphutils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + euphutils.mention(self.nickname) + '" or "!ukill ' + self.uuid + '".\nThis bot has UUID ' + self.uuid + '.'
 
         # Bot state
         self.paused = paused
@@ -43,7 +43,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
 
         # Bot state info
         self.pause_text = pause_text
-        self.generic_pause_text = 'To restore this bot, type "!restore ' + euphutils.mention(self.nickname) + '", or to kill this bot, type "!kill ' + euphutils.mention(self.nickname) + '".'
+        self.generic_pause_text = 'To restore this bot, type "!restore ' + euphutils.mention(self.nickname) + '", or to kill this bot, type "!kill ' + euphutils.mention(self.nickname) + '" or "!ukill ' + self.uuid + '".'
 
         self.write_to_file()
 
@@ -136,7 +136,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             if self.bots.is_bot(sender_agent_id):
                 return
             self.kill(msg_id=this_message)
-        elif euphutils.command('!ukill', self.uuid).match(content):
+        elif euphutils.command('!ukill\s+' + re.escape(self.uuid)).match(content):
             if self.bots.is_bot(sender_agent_id):
                 return
             self.kill(msg_id=this_message)

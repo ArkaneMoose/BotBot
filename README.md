@@ -88,8 +88,14 @@ Kill a bot with the name @BotName.
 Pause a bot with the name @BotName.  
 `!pause @BotName`
 
+Get the UUID of a bot with the name @BotName.  
+`!uuid @BotName`
+
+Kill a bot with the UUID 00112233-4455-6677-8899-aabbccddeeff.  
+`!ukill 00112233-4455-6677-8899-aabbccddeeff`
+
 Kill all the bots created by @BotBot.  
-`!killall @BotName`
+`!killall @BotBot`
 
 Take a snapshot of the state of @BotBot.  
 `!save @BotBot`
