@@ -7,9 +7,9 @@ import operator
 import time
 import json
 from simpleeval import SimpleEval, DEFAULT_OPERATORS, DEFAULT_FUNCTIONS, DEFAULT_NAMES
-from botbot.euphutils import EuphUtils
+from .euphutils import EuphUtils
 
-import botbot.logger as logger
+from . import logger
 
 log = logger.Logger()
 

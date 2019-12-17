@@ -5,9 +5,9 @@ import argparse
 
 import euphoria as eu
 
-from botbot.botbot import BotBot
-from botbot.euphutils import EuphUtils
-from botbot.snapshot import Snapshot
+from .botbot import BotBot
+from .euphutils import EuphUtils
+from .snapshot import Snapshot
 
 room_name = 'testing'
 password = None

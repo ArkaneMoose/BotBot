@@ -1,7 +1,7 @@
-from botbot.euphutils import EuphUtils
-from botbot.snapshot import Snapshot
-import botbot.agentid_room as agentid_room
-import botbot.longmessage_room as longmessage_room
+from .euphutils import EuphUtils
+from .snapshot import Snapshot
+from . import agentid_room
+from . import longmessage_room
 import euphoria as eu
 
 import time
@@ -9,6 +9,7 @@ import re
 import uuid as uuid_module
 import errno
 import os
+import traceback
 
 spam_threshold_messages = 10
 spam_threshold_time = 5

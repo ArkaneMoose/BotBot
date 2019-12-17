@@ -9,14 +9,14 @@ import traceback
 
 #Additional modules
 import euphoria as eu
-from botbot.euphutils import EuphUtils
+from .euphutils import EuphUtils
 
 #Project modules
-import botbot.logger as logger
-import botbot.agentid_room as agentid_room
-import botbot.longmessage_room as longmessage_room
-from botbot.botcollection import BotCollection
-from botbot.snapshot import Snapshot
+from . import logger
+from . import agentid_room
+from . import longmessage_room
+from .botcollection import BotCollection
+from .snapshot import Snapshot
 
 log = logger.Logger()
 

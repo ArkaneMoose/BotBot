@@ -6,7 +6,7 @@ import json
 import shutil
 import time
 
-import botbot.logger as logger
+from . import logger
 
 log = logger.Logger()
 
