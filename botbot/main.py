@@ -7,7 +7,7 @@ import euphoria as eu
 
 from .botbot import BotBot
 from . import euphutils
-from .snapshot import Snapshot
+from . import snapshot
 
 room_name = 'testing'
 password = None
@@ -94,5 +94,5 @@ if __name__ == '__main__':
     nickname = args['nickname'] or config.get('nickname', nickname)
     help_text = config.get('helpText', help_text.replace('@BotBot', euphutils.mention(nickname)))
     short_help_text = config.get('shortHelpText', short_help_text.replace('@BotBot', euphutils.mention(nickname)))
-    Snapshot.snapshot_dir = args['snapshot_dir'] or config.get('snapshotDirectory', Snapshot.snapshot_dir)
+    snapshot.snapshot_dir = args['snapshot_dir'] or config.get('snapshotDirectory', snapshot.snapshot_dir)
     main()

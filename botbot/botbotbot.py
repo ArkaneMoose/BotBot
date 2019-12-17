@@ -1,4 +1,4 @@
-from .snapshot import Snapshot
+from . import snapshot
 from . import euphutils
 from . import agentid_room
 from . import longmessage_room
@@ -25,7 +25,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
 
         # Bot info
         self.uuid = uuid or str(uuid_module.uuid4())
-        self.filename = os.path.join(Snapshot.snapshot_dir, 'current', self.uuid + '.json')
+        self.filename = os.path.join(snapshot.snapshot_dir, 'current', self.uuid + '.json')
         self.agent_id = None
         self.room_name = room_name
         self.password = password
@@ -55,15 +55,15 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             self.write_to_file()
 
     def write_to_file(self):
-        if Snapshot.is_enabled():
+        if snapshot.is_enabled():
             try:
-                os.makedirs(os.path.join(Snapshot.snapshot_dir, 'current'))
+                os.makedirs(os.path.join(snapshot.snapshot_dir, 'current'))
             except OSError as err:
-                if err.errno != errno.EEXIST or not os.path.isdir(Snapshot.snapshot_dir):
+                if err.errno != errno.EEXIST or not os.path.isdir(snapshot.snapshot_dir):
                     traceback.print_exc()
             try:
                 with open(self.filename, 'w') as f:
-                    f.write(Snapshot.pack_bot(self))
+                    f.write(snapshot.pack_bot(self))
                 return True
             except OSError:
                 traceback.print_exc()
@@ -291,7 +291,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         if announce:
             self.send_chat('/me is now exiting.', msg_id)
         self.bots.remove(self)
-        if delete_file and Snapshot.is_enabled():
+        if delete_file and snapshot.is_enabled():
             try:
                 os.unlink(self.filename)
             except OSError:

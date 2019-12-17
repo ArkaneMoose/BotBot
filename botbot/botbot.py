@@ -15,8 +15,8 @@ from . import euphutils
 from . import logger
 from . import agentid_room
 from . import longmessage_room
+from . import snapshot
 from .botcollection import BotCollection
-from .snapshot import Snapshot
 
 log = logger.Logger()
 
@@ -42,8 +42,8 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
         log.write(euphutils.mention(self.nickname) + ' has started.')
 
         self.send_chat('Hello, world!')
-        if Snapshot.is_enabled():
-            messages = Snapshot.load_current(self.bots)
+        if snapshot.is_enabled():
+            messages = snapshot.load_current(self.bots)
             for message in messages:
                 self.send_chat(message)
         else:
@@ -164,30 +164,30 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
             #!save
             match = euphutils.command('save', self.nickname).match(command)
             if match:
-                messages = Snapshot.create(self.bots)
+                messages = snapshot.create(self.bots)
                 for message in messages:
                     self.send_chat(message, msg_id)
                 return
             #!load
             match = euphutils.command('load', self.nickname).match(command)
             if match:
-                if not Snapshot.is_enabled():
+                if not snapshot.is_enabled():
                     self.send_chat('Snapshots are not enabled.', msg_id)
                     return
                 match = re.match(r'([^\s\\/]+\.tar\.gz\b|latest)', match.group(1), re.IGNORECASE)
                 if match:
-                    filepath = Snapshot.get_filepath(match.group(0))
+                    filepath = snapshot.get_filepath(match.group(0))
                 else:
                     filepath = None
                 if filepath:
                     self.send_chat('A snapshot will be created so that the current state can be restored if necessary.', msg_id)
-                    messages = Snapshot.create(self.bots)
+                    messages = snapshot.create(self.bots)
                     for message in messages:
                         self.send_chat(message, msg_id)
                     self.send_chat('Killing all bots...', msg_id)
                     self.bots.killall(False)
 
-                    messages = Snapshot.load(filepath, self.bots)
+                    messages = snapshot.load(filepath, self.bots)
                     for message in messages:
                         self.send_chat(message, msg_id)
                 else:
