@@ -35,6 +35,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
 
         self.bots = BotCollection(self)
         self.botthread = threading.Thread(target=self.bots.run)
+        self.loadthread = threading.Thread(target=self.load_current)
 
         self.initialized = False
 
@@ -42,12 +43,19 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
         log.write(euphutils.mention(self.nickname) + ' has started.')
 
         self.send_chat('Hello, world!')
-        if snapshot.is_enabled():
-            messages = snapshot.load_current(self.bots)
-            for message in messages:
-                self.send_chat(message)
-        else:
-            self.send_chat('Snapshots are not enabled.')
+        self.loadthread.start()
+
+    def load(self, filepath):
+        messages = snapshot.load(filepath, self.bots)
+        for message in messages:
+            self.send_chat(message)
+        self.loadthread = None
+
+    def load_current(self):
+        messages = snapshot.load_current(self.bots)
+        for message in messages:
+            self.send_chat(message)
+        self.loadthread = None
 
     def ready(self):
         super().ready()
@@ -112,7 +120,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                     try:
                         self.bots.create(match.group(2), match.group(1).lower() if match.group(1) else self.room_name, None if match.group(1) else self.password, sender, match.group(3))
                         self.send_chat('Created ' + euphutils.mention(match.group(2)) + ((' in &' + match.group(1).lower()) if match.group(1) else '') + '.', msg_id)
-                    except:
+                    except Exception:
                         self.send_chat('Failed to create ' + euphutils.mention(match.group(2)) + ((' in &' + match.group(1).lower()) if match.group(1) else '') + '. Is your code valid?', msg_id)
                         self.send_chat('Error details:\n' + ''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])), msg_id)
                 else:
@@ -144,7 +152,7 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                             try:
                                 self.bots.create(matching_bot.nickname, destination_room.lower() if destination_room else self.room_name, None if destination_room else self.password, matching_bot.creator, matching_bot.code_struct.parse_string)
                                 self.send_chat('Created ' + euphutils.mention(matching_bot.nickname) + ((' in &' + destination_room.lower()) if destination_room else '') + '.', msg_id)
-                            except:
+                            except Exception:
                                 self.send_chat('Failed to create ' + euphutils.mention(matching_bot.nickname) + ((' in &' + destination_room.lower()) if destination_room else '') + '.', msg_id)
                                 self.send_chat('Error details:\n' + ''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])), msg_id)
                         except ValueError:
@@ -174,6 +182,9 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                 if not snapshot.is_enabled():
                     self.send_chat('Snapshots are not enabled.', msg_id)
                     return
+                if self.loadthread is not None:
+                    self.send_chat('A snapshot is currently being loaded. Please wait for that to complete.', msg_id)
+                    return
                 match = re.match(r'([^\s\\/]+\.tar\.gz\b|latest)', match.group(1), re.IGNORECASE)
                 if match:
                     filepath = snapshot.get_filepath(match.group(0))
@@ -186,10 +197,8 @@ class BotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, agentid_room.AgentIdR
                         self.send_chat(message, msg_id)
                     self.send_chat('Killing all bots...', msg_id)
                     self.bots.killall(False)
-
-                    messages = snapshot.load(filepath, self.bots)
-                    for message in messages:
-                        self.send_chat(message, msg_id)
+                    self.loadthread = threading.Thread(target=self.load, args=(filepath,))
+                    self.loadthread.start()
                 else:
                     self.send_chat('Please provide a valid filename.', msg_id)
                 return

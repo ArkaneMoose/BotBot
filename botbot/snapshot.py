@@ -36,7 +36,8 @@ def create(bots):
         return ['Snapshots are not enabled.']
 
     try:
-        bot_count = len(os.listdir(os.path.join(snapshot_dir, 'current')))
+        bot_count = sum(filepath.endswith('.json') for filepath
+            in os.listdir(os.path.join(snapshot_dir, 'current')))
         if bot_count == 0:
             return ['There are no running bots. A snapshot will not be created.']
     except OSError as err:
@@ -75,13 +76,13 @@ def create(bots):
             return [msg_to_load_later, msg_latest_symlink_fail]
     except FileNotFoundError:
         pass
-    except:
+    except Exception:
         traceback.print_exc()
         return [msg_to_load_later, msg_latest_symlink_fail]
 
     try:
         os.symlink(filename, os.path.join(snapshot_dir, "latest"))
-    except:
+    except Exception:
         traceback.print_exc()
         return [msg_to_load_later, msg_latest_symlink_fail]
 
@@ -103,14 +104,14 @@ def load(filepath, bots):
     rm_errors = False
     try:
         shutil.rmtree(os.path.join(snapshot_dir, 'current'))
-    except:
+    except Exception:
         if os.path.isdir(os.path.join(snapshot_dir, 'current')):
             traceback.print_exc()
             rm_errors = True
 
     try:
         shutil.unpack_archive(filepath, os.path.join(snapshot_dir, 'current'), 'gztar')
-    except:
+    except Exception:
         return ['Could not unpack snapshot. Please verify that it exists.']
 
     messages = load_current(bots)
@@ -133,12 +134,15 @@ def load_current(bots):
             return ["Snapshot directory could not be created."]
 
     packed_bots_list = os.listdir(current_dir)
-    failed_bots = 0
+    loaded_bots = 0
+    total_bots = 0
 
     try:
         for packed_bot_filename in packed_bots_list:
             if not packed_bot_filename.endswith('.json'):
                 continue
+
+            total_bots += 1
             try:
                 with open(os.path.join(current_dir, packed_bot_filename)) as f:
                     packed_bot = json.load(f)
@@ -153,17 +157,18 @@ def load_current(bots):
                     variables=packed_bot.get('variables', None),
                     initialized=packed_bot.get('initialized', False)
                 )
-            except:
+            except Exception:
                 log.write('Failed to load ' + packed_bot_filename + ' from snapshot.')
                 traceback.print_exc()
-                failed_bots += 1
-            #sleep for 1 second to stagger bot loads
-            #this should alleviate some server burden
+            else:
+                loaded_bots += 1
+
+            # sleep for 1 second to stagger bot loads
+            # this should alleviate some server burden
             time.sleep(1)
     except OSError:
         return ['Could not read bots from unpacked snapshot.']
 
-    return ['Successfully loaded ' + str(len(packed_bots_list) - failed_bots) +
-        ' of ' + str(len(packed_bots_list)) + ' bot' +
-        ('s' if len(packed_bots_list) != 1 else '') +
+    return ['Successfully loaded ' + str(loaded_bots) + ' of ' +
+        str(total_bots) + ' bot' + ('s' if total_bots != 1 else '') +
         ' from snapshot.']

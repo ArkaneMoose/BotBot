@@ -155,7 +155,7 @@ class Parser:
                 yield str(evaluator.eval(variable_name))
             except GeneratorExit:
                 pass
-            except:
+            except Exception:
                 yield '[Error: {0}]'.format(''.join(traceback.format_exception_only(sys.exc_info()[0], sys.exc_info()[1])).strip())
 
     def parse_response_string(self, data, datatype=0):
