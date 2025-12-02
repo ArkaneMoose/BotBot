@@ -53,7 +53,7 @@ class Parser:
                 self.array[-1].append(temp[0])
                 i += len(temp[1])
                 temp = ''
-                whitespace_match = re.match('\s*', parse_string[i:])
+                whitespace_match = re.match(r'\s*', parse_string[i:])
                 if whitespace_match:
                     i += len(whitespace_match.group(0))
                 regex_mode = True
