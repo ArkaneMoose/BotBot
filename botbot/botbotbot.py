@@ -258,6 +258,11 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             if match:
                 break
             if self.spam_check(current_time, this_message):
+                # HACK: prevent (+init) botling-BotBot interaction bypass
+                # this also helps ensure it doesn't happen if two BotBots
+                if re.match(r'!(kill(all)?|createbot|sendbot|save|load|restart)\b', message):
+                    # BotBot doesn't ignore leading spaces in front of commands
+                    message = ' ' + message
                 self.send_chat(message, this_message)
             else: break
         return message is not None
