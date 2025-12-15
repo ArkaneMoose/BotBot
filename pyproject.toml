@@ -7,7 +7,7 @@ packages = ['botbot']
 
 [project]
 name = 'botbot'
-version = '0.5.4'
+version = '0.5.5'
 description = 'A meta-bot for Euphoria.'
 authors = [
   { name='Rishov Sarkar' },
