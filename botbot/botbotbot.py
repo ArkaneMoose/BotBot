@@ -31,7 +31,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         self.password = password
         self.nickname = nickname
         self.creator = creator
-        self.help_text = euphutils.mention(self.nickname) + ' is a bot created by "' + creator + '"' + (' using ' + euphutils.mention(bots.botbot.nickname) if self.bots.botbot else '') + '.\n\n@' + self.nickname + ' responds to !ping, !help @' + self.nickname + ', and the following regexes:\n' + ('\n'.join(self.code_struct.get_regexes()) if len(self.code_struct.get_regexes()) > 0 else '(None)') + '\n\nTo pause this bot, use the command "!pause ' + euphutils.mention(self.nickname) + '".\nTo kill this bot, use the command "!kill ' + euphutils.mention(self.nickname) + '" or "!ukill ' + self.uuid + '".\nThis bot has UUID ' + self.uuid + '.'
+        self.help_text = self.make_help_text()
 
         # Bot state
         self.paused = paused
@@ -43,7 +43,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
 
         # Bot state info
         self.pause_text = pause_text
-        self.generic_pause_text = 'To restore this bot, type "!restore ' + euphutils.mention(self.nickname) + '", or to kill this bot, type "!kill ' + euphutils.mention(self.nickname) + '" or "!ukill ' + self.uuid + '".'
+        self.generic_pause_text = self.make_generic_pause_text()
 
         self.write_to_file()
 
@@ -81,6 +81,23 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             self.recv_message(message['content'], message['parent'], message['id'], message['sender']['name'], message['sender']['id'], message['time'], self.room_name)
         else:
             self.recv_message(message['content'], None, message['id'], message['sender']['name'], message['sender']['id'], message['time'], self.room_name)
+
+    def make_help_text(self):
+        atself = euphutils.mention(self.nickname)
+        botbot = self.bots.botbot
+        using_botbot = ' using ' + euphutils.mention(botbot.nickname) if botbot else ''
+        regexes = self.code_struct.get_regexes()
+        regex_list = '\n'.join(regexes) if len(regexes) > 0 else '(None)'
+
+        return (f'{atself} is a bot created by "{self.creator}"{using_botbot}.\n\n'
+            f'{atself} responds to !ping, !help {atself}, and the following regexes:\n{regex_list}\n\n'
+            f'To pause this bot, use the command "!pause {atself}".'
+            f'\nTo kill this bot, use the command "!kill {atself}" or "!ukill {self.uuid}".\n'
+            f'This bot has UUID {self.uuid}.')
+
+    def make_generic_pause_text(self):
+        atself = euphutils.mention(self.nickname)
+        return f'To restore this bot, type "!restore {atself}", or to kill this bot, type "!kill {atself}" or "!ukill {self.uuid}".'
 
     def pause(self, pause_text=None, set_pause_text=True, reply_to=None):
         changed = False
@@ -136,7 +153,7 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             if self.bots.is_bot(sender_agent_id):
                 return
             self.kill(msg_id=this_message)
-        elif euphutils.command('!ukill\s+' + re.escape(self.uuid)).match(content):
+        elif euphutils.command(r'!ukill\s+' + re.escape(self.uuid)).match(content):
             if self.bots.is_bot(sender_agent_id):
                 return
             self.kill(msg_id=this_message)
@@ -258,6 +275,11 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
             if match:
                 break
             if self.spam_check(current_time, this_message):
+                # HACK: prevent (+init) botling-BotBot interaction bypass
+                # this also helps ensure it doesn't happen if two BotBots
+                if re.match(r'!(kill(all)?|createbot|sendbot|save|load|restart)\b', message):
+                    # BotBot doesn't ignore leading spaces in front of commands
+                    message = ' ' + message
                 self.send_chat(message, this_message)
             else: break
         return message is not None
@@ -286,6 +308,9 @@ class BotBotBot(eu.ping_room.PingRoom, eu.chat_room.ChatRoom, eu.nick_room.NickR
         super().handle_nickreply(data)
         if self.nickname != previous_nickname:
             self.write_to_file()
+            # update default help and pause texts
+            self.help_text = self.make_help_text()
+            self.generic_pause_text = self.make_generic_pause_text()
 
     def kill(self, announce=True, msg_id=None, delete_file=True):
         if announce:

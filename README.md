@@ -5,7 +5,7 @@ A bot for [Euphoria](https://euphoria.io/) created by @myhandsaretypingwords tha
 
 @BotBot uses Python 3.
 
-To install: `python3 setup.py install`
+To install: `python3 -m pip install .`
 
 To run: `botbot`
 

@@ -9,10 +9,10 @@ def mention_regex(nick):
 
 def command(name, nickname=None, match_string=None):
     if nickname == '':
-        return re.compile(name + r'\b\s*$', re.IGNORECASE + re.DOTALL + re.MULTILINE)
+        return re.compile(name + r'\s*$', re.IGNORECASE + re.DOTALL + re.MULTILINE)
     elif not nickname:
-        return re.compile(name + r'\b\s*(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
-    return re.compile(name + r'\s+' + re.escape(mention(nickname)) + r'(?:\b|$|(?=\s))\s*(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
+        return re.compile(name + r'(?:$|\s+)(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
+    return re.compile(name + r'\s+' + re.escape(mention(nickname)) + r'(?:$|\s+)(.*)', re.IGNORECASE + re.DOTALL + re.MULTILINE)
 
 def uptime_utc(start_time):
     return time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(start_time))

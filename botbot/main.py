@@ -27,12 +27,12 @@ List all the bots that are currently running and have been created by @BotBot.
     !list @BotBot
 Send a bot with the name @BotName to the specified room.
     !sendbot &room @BotName
-Kill a bot with the name @BotName.
+Kill all bots with the name @BotName.
     !kill @BotName
 Pause a bot with the name @BotName.
     !pause @BotName
 Kill all the bots created by @BotBot.
-    !killall @BotName
+    !killall @BotBot
 Take a snapshot of the state of @BotBot.
     !save @BotBot
 Load the latest snapshot.

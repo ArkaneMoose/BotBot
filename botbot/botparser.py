@@ -6,7 +6,7 @@ import ast
 import operator
 import time
 import json
-from simpleeval import SimpleEval, DEFAULT_OPERATORS, DEFAULT_FUNCTIONS, DEFAULT_NAMES
+from simpleeval import EvalWithCompoundTypes, DEFAULT_OPERATORS, DEFAULT_FUNCTIONS, DISALLOW_FUNCTIONS
 from . import euphutils
 
 from . import logger
@@ -17,7 +17,8 @@ log = logger.Logger()
 EVAL_FUNCTIONS = DEFAULT_FUNCTIONS.copy()
 EVAL_FUNCTIONS.update({'bool': bool, 'repr': repr, 'to_json': lambda x: json.dumps(x), 'from_json': lambda x: json.loads(x), 'len': len, 'mention': euphutils.mention, 'unwhitespace': lambda x: re.sub(r'\s', '_', x), 'time': time.time, 'eval': None})
 EVAL_OPERATORS = DEFAULT_OPERATORS.copy()
-EVAL_OPERATORS.update({ast.Not: operator.not_, ast.In: lambda a, b: a in b, ast.NotIn: lambda a, b: a not in b, ast.Is: operator.is_, ast.IsNot: operator.is_not})
+# XXX: AFAICT repr() is safe for our purposes.
+DISALLOW_FUNCTIONS.discard(repr)
 
 # init pseudo-regex; i.e. if a bot has this as the regex string, its response
 # will be triggered on the bot's initialization
@@ -53,7 +54,7 @@ class Parser:
                 self.array[-1].append(temp[0])
                 i += len(temp[1])
                 temp = ''
-                whitespace_match = re.match('\s*', parse_string[i:])
+                whitespace_match = re.match(r'\s*', parse_string[i:])
                 if whitespace_match:
                     i += len(whitespace_match.group(0))
                 regex_mode = True
@@ -148,7 +149,7 @@ class Parser:
             variable_name = parsed_data[1]
             if type(variable_name) is not str:
                 variable_name = next(self.parse_entry(variable_name), '')
-            evaluator = SimpleEval(names=self.variables.copy(), functions=EVAL_FUNCTIONS, operators=EVAL_OPERATORS)
+            evaluator = EvalWithCompoundTypes(names=self.variables.copy(), functions=EVAL_FUNCTIONS, operators=EVAL_OPERATORS)
             evaluator.names['variables'] = evaluator.names
             evaluator.functions['eval'] = evaluator.eval
             try:
