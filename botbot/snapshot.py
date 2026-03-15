@@ -52,7 +52,7 @@ def create(bots):
             traceback.print_exc()
             return ["Snapshot directory could not be created."]
 
-    basename = datetime.datetime.now().strftime('%Y-%m-%d_%H%M%S')
+    basename = datetime.datetime.now(datetime.timezone.utc).strftime('%Y-%m-%d_%H%M%SZ')
     filepath_from_basename = os.path.join(snapshot_dir, basename)
 
     #Dump the bots to the file
