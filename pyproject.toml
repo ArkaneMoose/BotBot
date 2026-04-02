@@ -16,7 +16,7 @@ readme = 'README.md'
 # TODO: add minimum required python version
 dependencies = [
   'eupy @ git+https://github.com/ArkaneMoose/EuPy.git@2716bc40d7514726d85f22720a3ec0fc98471a43#egg=eupy-1.2.1',
-  'simpleeval >=1.0.0, <2.0.0',
+  'simpleeval >=1.0.0, <=1.0.3',
 ]
 classifiers = [
   'Programming Language :: Python :: 3',
