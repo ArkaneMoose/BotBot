@@ -1,5 +1,5 @@
 # @BotBot
-A bot for [Euphoria](https://euphoria.io/) created by @myhandsaretypingwords that creates other bots.
+A bot for [Euphoria](https://euphoria.leet.nu/) created by @myhandsaretypingwords that creates other bots, currently maintained by @JRF.
 
 ## Installation
 
@@ -20,7 +20,7 @@ The command-line options are:
 Short form        | Long form                     | Description                                        | Default value
 ------------------|-------------------------------|----------------------------------------------------|---------------------------------------------
 `-h`              | `--help`                      | Show a help message and exit                       |  
-`-r ROOM`         | `--room ROOM`                 | Room in Euphoria where @BotBot should reside       | [`testing`](https://euphoria.io/room/testing/)
+`-r ROOM`         | `--room ROOM`                 | Room in Euphoria where @BotBot should reside       | [`testing`](https://euphoria.leet.nu/room/testing/)
 `-p PASSWORD`     | `--password PASSWORD`         | Password for room if necessary                     | None
 `-n NICKNAME`     | `--nickname NICKNAME`         | Custom nickname for @BotBot                        | `BotBot`
 `-s SNAPSHOT_DIR` | `--snapshot-dir SNAPSHOT_DIR` | Directory where snapshots will be read and written | None
@@ -40,7 +40,7 @@ The possible options that can be specified in the configuration file are as foll
 
 JSON key              | Description                                                            | Default value
 ----------------------|------------------------------------------------------------------------|---------------------------------------------
-`"room"`              | Room in Euphoria where @BotBot should reside                           | [`"testing"`](https://euphoria.io/room/testing/)
+`"room"`              | Room in Euphoria where @BotBot should reside                           | [`"testing"`](https://euphoria.leet.nu/room/testing/)
 `"password"`          | Password for room if necessary                                         | `null`
 `"nickname"`          | Custom nickname for @BotBot                                            | `"BotBot"`
 `"helpText"`          | Custom help text for @BotBot; shown when someone sends `!help @BotBot` | See [`defaults.json`](https://github.com/ArkaneMoose/BotBot/blob/master/defaults.json#L5).
@@ -143,9 +143,9 @@ View the [@BotBot wiki](https://github.com/ArkaneMoose/BotBot/wiki) for a compre
 ### Good luck!
 Good luck on your journey to becoming a bot programmer.
 
-There is always an instance of @BotBot up in [&bots](https://euphoria.io/room/bots/) for you to program.
+There is always an instance of @BotBot up in [&bots](https://euphoria.leet.nu/room/bots/) for you to program.
 
-If you need help, you can ask @myhandsaretypingwords, @jedevc, or any of the other awesome Euphorians in [&programming](https://euphoria.io/room/programming/) for help with any bot-related questions.
+If you need help, you can ask @myhandsaretypingwords, @jedevc, @JRF, or any of the other awesome Euphorians in [&programming](https://euphoria.leet.nu/room/programming/) for help with any bot-related questions.
 
 Have fun, and please be respectful!
 
