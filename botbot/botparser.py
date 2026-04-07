@@ -90,7 +90,6 @@ class Parser:
             try:
                 regex = re.compile(regex_string, re.IGNORECASE)
             except re.error as e:
-                log.write('Bad regular expression {!r} ({!s}), ignoring. ({!s})'.format(regex_string, e, self.dbginfo))
                 continue
             match = regex.search(content)
             if match:
