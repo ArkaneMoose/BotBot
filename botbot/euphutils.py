@@ -1,5 +1,6 @@
 import re
 import time
+import urllib.request, urllib.error
 
 def mention(nick):
     return '@' + ''.join(re.split(r'\s', nick))
@@ -35,3 +36,17 @@ def uptime_dhms(start_time):
 
 def uptime_str(start_time):
     return '/me has been up since ' + uptime_utc(start_time) + ' UTC (' + uptime_dhms(start_time) + ')'
+
+# HACK: more proper fix would be for EuPy to:
+#   a) distinguish 404s from other errors and
+#   b) pass those errors up the chain somehow
+def assert_room_exists(room):
+    try:
+        req = urllib.request.Request(method='HEAD',
+            url=f'https://euphoria.leet.nu/room/{room}/ws')
+        urllib.request.urlopen(req)
+    except urllib.error.HTTPError as e:
+        if e.code == 400:
+            return True
+        # very fragile... could break if e.g. a valid room is redirected to its web page
+        raise e

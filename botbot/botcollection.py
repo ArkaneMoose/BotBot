@@ -41,6 +41,7 @@ class BotCollection(eu.execgroup.ExecGroup):
             pass
 
     def create(self, nickname, room_name, password, creator, code, paused=False, pause_text='', uuid=None, variables=None, initialized=False):
+        euphutils.assert_room_exists(room_name)
         if uuid:
             for bot in self.bots:
                 if bot.uuid == uuid:
